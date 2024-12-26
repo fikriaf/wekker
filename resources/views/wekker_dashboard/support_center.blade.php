@@ -99,10 +99,16 @@
             </header>
             <div class="nav-build ms-2 d-flex gap-2 justify-content-end align-items-center">
                 <div class="dropdown profile d-flex justify-content-end">
-                    <button class="btn user border" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
-                        @auth
-                            <img src="{{ Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('wekker_dashboard/sources/logo/WEKKER_profile.png') }}" alt="">
-                        @endauth
+                    <button class="btn user border shadow shadow-sm border-primary" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
+                    @auth
+                        @php
+                            $profilePhotoPath = Auth::user()?->profile_photo_path;
+                            $profilePhoto = $profilePhotoPath && Storage::exists($profilePhotoPath) 
+                                            ? asset('storage/' . $profilePhotoPath) 
+                                            : asset('wekker_dashboard/sources/logo/WEKKER_profile.png');
+                        @endphp
+                        <img src="{{ $profilePhoto }}" alt="">
+                    @endauth
                     </button>
                     <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuProfile">
                         <li>
@@ -157,7 +163,7 @@
                                 <i class="bi bi-chat-dots fs-1 text-warning"></i>
                             </div>
                             <h5 class="card-title">Chat</h5>
-                            <p class="card-text">Connect with our support team directly for instant help and assistance.</p>
+                            <p class="card-text">Connect with our assistant AI Chat directly for instant help and assistance.</p>
                             <button class="btn btn-warning text-white" data-bs-toggle="modal" data-bs-target="#chatModal">Start Chat</button>
                         </div>
                     </div>
@@ -212,24 +218,24 @@
         
         <!-- Chat Modal -->
         <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="chatModalLabel">Live Chat</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="chat-box" style="max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; padding: 10px;">
-                            <div class="message my-2">
-                                <strong>Support:</strong> Hi! How can we help you today?
+                        <div class="chat-box w-100 d-flex flex-column" style="max-height: 24rem; overflow-y: auto; border: 1px solid #dee2e6; padding: 10px;" id="pushMessage">
+                            <div class="message-ai my-2">
+                                Hi! How can we help you today?
                             </div>
-                            <div class="message my-2 text-end">
-                                <strong>You:</strong> I need assistance with my account.
+                            <div class="message-user my-2 text-end">
+                                I need assistance with my account.
                             </div>
                         </div>
                         <div class="mt-3">
-                            <textarea class="form-control" placeholder="Type your message..."></textarea>
-                            <button class="btn btn-warning text-white mt-2 w-100">Send</button>
+                            <textarea class="form-control" placeholder="Type your message..." id="messageAssistant"></textarea>
+                            <button class="btn btn-warning text-white mt-2 w-100" id="sendAssistant">Send</button>
                         </div>
                     </div>
                 </div>

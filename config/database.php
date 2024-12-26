@@ -93,6 +93,19 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'user' => [
+            'driver' => 'mysql',
+            'host' => env('USER_DB_HOST', '127.0.0.1'),
+            'database' => '', // Akan diisi dinamis di runtime
+            'username' => env('USER_DB_USERNAME', 'root'),
+            'password' => env('USER_DB_PASSWORD', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
     ],
 
     /*

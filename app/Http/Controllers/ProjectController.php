@@ -40,9 +40,9 @@ class ProjectController extends Controller
 
         $project = Project::create([
             'name' => $validated['name'],
-            'html' => $validated['html'] ?? '',
-            'css' => $validated['css'] ?? '',
-            'javascript' => $validated['javascript'] ?? '',
+            'html' => $validated['html'] ?? null,
+            'css' => $validated['css'] ?? null,
+            'javascript' => $validated['javascript'] ?? null,
             'uuid' => Str::uuid(),
             'user_id' => Auth::id(),
         ]);
@@ -65,8 +65,9 @@ class ProjectController extends Controller
     {
         $user = Auth::user();
         if ($id_unik) {
-            $project = Project::where('uuid', $id_unik)
-                            ->where('user_id', Auth::id())->first();
+            $project = Project::where('uuid', $id_unik)->where('user_id', Auth::id())
+                                                                        ->orderBy('updated_at', 'desc')
+                                                                        ->first();
             if (!$project) {
                 return redirect('/dashboard/main-builder')->with('error', 'Proyek tidak ditemukan');
             }
@@ -76,10 +77,10 @@ class ProjectController extends Controller
         $project = Project::where('user_id', Auth::id())->latest()->first();
         if (!$project) {
             $project = Project::create([
-                'name' => 'Proyek Baru',
-                'html' => '',
-                'css' => '',
-                'javascript' => '',
+                'name' => 'project1',
+                'html' => null,
+                'css' => null,
+                'javascript' => null,
                 'uuid' => Str::uuid(),
                 'user_id' => Auth::id(),
             ]);
@@ -108,9 +109,9 @@ class ProjectController extends Controller
     public function GetListProject()
     {
         $projects = Project::where('user_id', Auth::id())
-                       ->select('uuid', 'name', 'updated_at')
-                       ->orderBy('created_at', 'desc')
-                       ->get();
+                            ->orderBy('updated_at', 'desc')
+                            ->get();
+        
         if (!$projects) {
             return response()->json(['error' => 'No projects found'], 404);
         }

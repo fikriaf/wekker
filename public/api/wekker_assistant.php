@@ -4,63 +4,24 @@ set_time_limit(0);
 header('Content-Type: text/html; charset=utf-8');
 header('Cache-Control: no-cache');
 header('Connection: keep-alive');
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
+flush();
+ob_flush();
+$hashnya = "l9hdjdc60e";
+$url = "https://qwen-qwen1-5-110b-chat-demo.hf.space/queue/join?__theme=light";
+$url_res = "https://qwen-qwen1-5-110b-chat-demo.hf.space/queue/data?session_hash=". $hashnya;
+$ua = file_exists('ua.txt') ? trim(file('ua.txt')[array_rand(file('ua.txt'))]) : "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36";
 
 if (!isset($_SESSION['hist1'])) {
     $_SESSION['hist1'] = [];
-    error_log("Session is initialized on the server");
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $error = [];
-
-    // Debug: Log POST data
-    error_log("POST Data: " . print_r($_POST, true));
-
-    if (!isset($_POST["api_key"])) {
-        $error["error"] = "Error parameter api_key. Please Check Your Api Key";
-        echo json_encode($error, JSON_PRETTY_PRINT);
-        error_log("Missing api_key");
-        exit;
-    }
-
-    $api_key = $_POST["api_key"];
-    $prompt = $_POST["prompt"] ?? null;
-    $material = $_POST["materials"] ?? null;
-
-    // Debug: Log parameter values
-    error_log("API Key: $api_key, Prompt: $prompt, Materials: $material");
-
-    if ($api_key != "123") {
-        $error["invalid"] = "API Key Invalid. Please Check Your Api Key!";
-        echo json_encode($error, JSON_PRETTY_PRINT);
-        error_log("Invalid API Key");
-        exit;
-    } else if (!$prompt) {
-        $error["error"] = "Error parameter prompt. Please insert value to parameter prompt!";
-        echo json_encode($error, JSON_PRETTY_PRINT);
-        error_log("Missing prompt");
-        exit;
-    } else {
-        $response = ai($prompt, $material);
-        echo extractAndReturnJSON($response);
-    }
-}
-
-function ai($teksnya, $materials) {
-    $hashnya = "l9hdjdc60e";
-    $url = "https://qwen-qwen1-5-110b-chat-demo.hf.space/queue/join?__theme=light";
-    $url_res = "https://qwen-qwen1-5-110b-chat-demo.hf.space/queue/data?session_hash=". $hashnya;
-    $ua = file_exists('ua.txt') ? trim(file('ua.txt')[array_rand(file('ua.txt'))]) : "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36";
-
-    $teks = $materials ? $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML. Harus mengandung komponen: ".$materials : $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML";
+    $teks = $_POST['teksnya'];
     $data = [
         "data" => [
             $teks,
             $_SESSION['hist1'],
-            "NO EXPLANATION, DIRECT CODING. You are a webpage creation machine. You can only create web code using HTML, CSS and JS separately."
+            "You are AI assistant from Wekker. Dengan Wekker, pengguna dapat menciptakan berbagai jenis halaman web dengan cepat tanpa memerlukan keahlian teknis yang mendalam. Fitur-fitur seperti Main Builder, Developer Tools, dan API Management memungkinkan pengguna untuk menyesuaikan halaman web sesuai kebutuhan mereka, mulai dari desain hingga fungsionalitas backend"
         ],
         "event_data" => null,
         "fn_index" => 0,
@@ -127,9 +88,9 @@ function ai($teksnya, $materials) {
                                                 }
                     
                                                 if (!$exists) {
-                                                    // echo $text_value;
-                                                    // flush();
-                                                    // ob_flush();
+                                                    echo $text_value;
+                                                    flush();
+                                                    ob_flush();
                                                     $respon .= $text_value;
                                                     break;
                                                 }
@@ -157,9 +118,9 @@ function ai($teksnya, $materials) {
                                             $text_value = $item[2];
                     
                                             if (is_string($text_value) && !in_array($text_value, array_column($_SESSION['hist1'], 1))) {
-                                                // echo $text_value;
-                                                // flush();
-                                                // ob_flush();
+                                                echo $text_value;
+                                                flush();
+                                                ob_flush();
                                                 $respon .= $text_value;
                                             }
                                         }
@@ -188,24 +149,5 @@ function ai($teksnya, $materials) {
     }
     $_SESSION['hist1'][] = [$teks, $respon];
     // error_log("Session Result: " . json_encode($_SESSION['hist1'], JSON_PRETTY_PRINT));
-    return $respon;
-}
-
-function extractAndReturnJSON($response) {
-    $pattern = "/```(\w+)\n(.*?)\n```/s";
-
-    $result = [];
-    if (preg_match_all($pattern, $response, $matches)) {
-        foreach ($matches[1] as $index => $language) {
-            $result[$language] = [
-                "code" => $matches[2][$index]
-            ];
-        }
-    } else {
-        $result['error'] = "Sorry, nothing response from server.";
-    }
-    // Debug: Log extracted result
-    error_log("Extracted Result: " . json_encode($result, JSON_PRETTY_PRINT));
-
-    return json_encode($result, JSON_PRETTY_PRINT);
+    // return $respon;
 }

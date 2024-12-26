@@ -84,8 +84,8 @@
     </div>
 
     <!-- ========================= Main ==================== -->
-    <div class="main px-4">
-        <div class="topbar" style="margin-left: 1.5rem;">
+    <div class="main">
+        <div class="topbar px-4" style="margin-left: 1.5rem;">
             <div class="toggle">
                 <ion-icon class="menu-outline" name="menu-outline"></ion-icon>
             </div>
@@ -99,10 +99,16 @@
             </header>
             <div class="nav-build ms-2 d-flex gap-2 justify-content-end align-items-center">
                 <div class="dropdown profile d-flex justify-content-end">
-                    <button class="btn user border" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
-                        @auth
-                            <img src="{{ Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('wekker_dashboard/sources/logo/WEKKER_profile.png') }}" alt="">
-                        @endauth
+                    <button class="btn user border shadow shadow-sm border-primary" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
+                    @auth
+                        @php
+                            $profilePhotoPath = Auth::user()?->profile_photo_path;
+                            $profilePhoto = $profilePhotoPath && Storage::exists($profilePhotoPath) 
+                                            ? asset('storage/' . $profilePhotoPath) 
+                                            : asset('wekker_dashboard/sources/logo/WEKKER_profile.png');
+                        @endphp
+                        <img src="{{ $profilePhoto }}" alt="">
+                    @endauth
                     </button>
                     <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuProfile">
                         <li>
@@ -139,11 +145,20 @@
                                 type="button" role="tab" aria-controls="library" aria-selected="false">Library</button>
                     </li>
                 </ul>
-                <div class="tab-content">
-                    <!-- Database Information -->
+                <div class="tab-content">  
+                    <div class="tab-pane w-100 h-100 position-absolute bg-dark bg-opacity-75 justify-content-center align-items-center" id="panelCreateDB" style="z-index: 9;">
+                        <div class="text-center bg-white p-4 rounded shadow">
+                            <div class="spinner-border text-primary mx-5" id="SpinnerBorder"></div>
+                            <div class="text-primary mx-5" id="successCreate" style="font-size: 4rem;"><ion-icon name="checkmark-circle"></ion-icon></div>
+                            <div id="infoEmptyDB">
+                                <h4 class="mb-3">Your database is not yet available</h4>
+                                <button class="btn btn-primary" id="btnCreateDB">Create Database</button>
+                            </div>
+                        </div>
+                    </div>                  
                     <div class="tab-pane fade show active mt-3" id="database" role="tabpanel" aria-labelledby="database-tab">
                         <h2 class="text-center mb-4">Database Management System</h2>
-                        <div class="card mb-4">
+                        <div class="card mb-4 mx-4">
                             <div class="card-header bg-primary text-white">
                                 <h5 class="mb-0">Database Information</h5>
                             </div>
@@ -151,15 +166,15 @@
                                 <div class="row">
                                     <div class="col-md-3">
                                         <h6>Database Name</h6>
-                                        <p><strong>my_database</strong></p>
+                                        <p><strong id="nameDB">my_database</strong></p>
                                     </div>
                                     <div class="col-md-3">
                                         <h6>Tables</h6>
-                                        <p><strong>5</strong></p>
+                                        <p><strong id="sumTable">null</strong></p>
                                     </div>
                                     <div class="col-md-3">
-                                        <h6>Rows</h6>
-                                        <p><strong>125</strong></p>
+                                        <h6>Owner</h6>
+                                        <p><strong id="namaUser">null</strong></p>
                                     </div>
                                     <div class="col-md-3">
                                         <h6>DBMS Version</h6>
@@ -169,26 +184,26 @@
                                 <div class="row">
                                     <div class="col-md-3">
                                         <h6>Storage Used</h6>
-                                        <p><strong>1.2 GB</strong></p>
+                                        <p><strong id="storageUsed">null</strong></p>
                                     </div>
                                     <div class="col-md-3">
-                                        <h6>Last Backup</h6>
-                                        <p><strong>2024-12-15</strong></p>
+                                        <h6>Expires at</h6>
+                                        <p><strong id="endTime">Null</strong></p>
                                     </div>
                                     <div class="col-md-3">
                                         <h6>Users Connected</h6>
-                                        <p><strong>3</strong></p>
+                                        <p><strong>1</strong></p>
                                     </div>
                                     <div class="col-md-3">
                                         <h6>Status</h6>
-                                        <p><strong class="text-success">Online</strong></p>
+                                        <p><strong class="text-success" id="statusDB">Online</strong></p>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Navigation Tabs -->
-                        <ul class="nav nav-tabs d-inline-flex" id="databaseTabs" role="tablist">
+                        <ul class="nav nav-tabs d-inline-flex mx-4" id="databaseTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="view-tab" data-bs-toggle="tab" data-bs-target="#view"
                                     type="button" role="tab" aria-controls="view" aria-selected="true">View Records</button>
@@ -208,7 +223,7 @@
                         </ul>
 
                         <!-- Tab Content -->
-                        <div class="tab-content mt-3" id="databaseTabContent">
+                        <div class="tab-content mt-3 mx-4" id="databaseTabContent">
                             <!-- View Records -->
                             <div class="tab-pane fade show active" id="view" role="tabpanel" aria-labelledby="view-tab">
                                 <table class="table table-striped">

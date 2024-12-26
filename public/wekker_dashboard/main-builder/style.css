@@ -20,6 +20,9 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+.dropdown-item:hover {
+  color: black !important; /* Mengubah teks menjadi hitam */
+}
 :root {
   --bs-primary: #2a2185;
   --blue: #2a2185;

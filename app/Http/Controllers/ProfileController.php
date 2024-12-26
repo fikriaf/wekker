@@ -35,22 +35,16 @@ class ProfileController extends Controller
 
         if ($request->hasFile('profile_photo')) {
             $path = $request->file('profile_photo')->store('profile_photos', 'public');
-            Log::info('File stored at: ' . $path);
         
             $request->user()->update([
                 'profile_photo_path' => $path,
             ]);
-        
-            Log::info('Database updated with profile_photo_path: ' . $path);
         }
         
-
-        // Jika email diubah, set email_verified_at ke null
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
         }
 
-        // Simpan perubahan
         $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');

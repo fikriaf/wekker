@@ -100,10 +100,16 @@
             </header>
             <div class="nav-build ms-2 d-flex gap-2 justify-content-end align-items-center">
                 <div class="dropdown profile d-flex justify-content-end">
-                    <button class="btn user border" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
-                        @auth
-                            <img src="{{ Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('wekker_dashboard/sources/logo/WEKKER_profile.png') }}" alt="">
-                        @endauth
+                    <button class="btn user border shadow shadow-sm border-primary" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
+                    @auth
+                        @php
+                            $profilePhotoPath = Auth::user()?->profile_photo_path;
+                            $profilePhoto = $profilePhotoPath && Storage::exists($profilePhotoPath) 
+                                            ? asset('storage/' . $profilePhotoPath) 
+                                            : asset('wekker_dashboard/sources/logo/WEKKER_profile.png');
+                        @endphp
+                        <img src="{{ $profilePhoto }}" alt="">
+                    @endauth
                     </button>
                     <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuProfile">
                         <li>
@@ -135,19 +141,16 @@
                         </div>
                     </div>
                     <ul class="list-group" id="projectList">
-                        <li class="list-group-item folder-item" data-path="/Project1">
-                            <i class="bi bi-folder-fill folder-icon"></i> Project1
-                        </li>
                     </ul>
                 </div>
             
                 <!-- Main File View -->
-                <div class="col-md-9 px-3">
+                <div class="col-md-9 px-3" id="showFiles">
                     <!-- Breadcrumb -->
                     <nav class="d-flex row align-items-center justify-content-between mb-3 subnav" aria-label="breadcrumb">
                         <div class="col-12 col-md-6 m-0">
                             <ol class="breadcrumb m-0" id="breadcrumb">
-                                <li class="breadcrumb-item active" aria-current="page">Root</li>
+                                <li class="breadcrumb-item active" aria-current="page">root</li>
                             </ol>
                         </div>
                         <div class="col-12 col-md-6 p-0 m-0 interaction d-flex gap-2 justify-content-end">
@@ -168,53 +171,6 @@
                             </div>
                         </div>
                     </nav>
-
-                    <!-- File Grid -->
-                    <div class="row row-cols-2 row-cols-md-4 g-4 file-grid" id="fileGrid">
-                        <div class="col">
-                            <div class="card p-3">
-                                <i class="bi bi-folder-fill folder-icon fs-1"></i>
-                                <p class="mt-2 mb-0">Documents</p>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="card p-3">
-                                <i class="bi bi-folder-fill folder-icon fs-1"></i>
-                                <p class="mt-2 mb-0">Downloads</p>
-                            </div>
-                        </div>
-                        <div class="col">
-                            <div class="card filenya p-3">
-                                <i class="bi bi-file-earmark fs-1"></i>
-                                <p class="mt-2 mb-0">example.txt</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- File List (Hidden by Default) -->
-                    <div class="list-group file-list d-none" id="fileList">
-                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-folder-fill folder-icon fs-4"></i>
-                                <span>Documents</span>
-                            </div>
-                            <span>2 items</span>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi bi-folder-fill folder-icon fs-4"></i>
-                                <span>Downloads</span>
-                            </div>
-                            <span>5 items</span>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bi filenya bi-file-earmark fs-4"></i>
-                                <span>example.txt</span>
-                            </div>
-                            <span>10 KB</span>
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>

@@ -1,6 +1,13 @@
 let lastSessionDatas = { html: '', css: '', js: '' };
 document.addEventListener('DOMContentLoaded', async function() {
 
+  const createProject = document.getElementById('createProject');
+  createProject.addEventListener('click', () => {
+    localStorage.setItem('html', null);
+    localStorage.setItem('css', null);
+    localStorage.setItem('js', null);
+  })
+
   const uuid = window.location.pathname.split('/').pop();
   const dropdownlistProject = document.getElementById('dropdownlistProject');
   const dropdownProject = document.getElementById('dropdownProject');
@@ -63,10 +70,22 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   // -----------------------------------------------------------------------------------------------------
 
-  shareLink = document.getElementById('shareLink')
+  let shareLink = document.getElementById('shareLink')
   document.getElementById('btnShareLink').addEventListener('click', async () => {
     const urlfull = window.location.href;
     shareLink.value = urlfull;
+  });
+
+  const btnShare = document.getElementById('btnShare');
+  btnShare.addEventListener('click', function () {
+    navigator.clipboard.writeText(shareLink).then(() => {
+      btnShare.textContent = '';
+      btnShare.innerHTML = `<ion-icon name="checkmark-done"></ion-icon>`;
+      setTimeout(() => {
+        btnShare.innerHTML = '';
+        btnShare.textContent = 'Copy';
+      }, 3000);
+    });
   });
 
   // -----------------------------------------------------------------------------------------------------
@@ -215,9 +234,14 @@ document.addEventListener('DOMContentLoaded', async function() {
   const iframe = indukanPreview.querySelector("iframe");
   const indikasi = document.querySelector(".footer-preview")
 
-  const slider = document.getElementById('resolutionSlider');
-  const tooltip = document.getElementById('tooltip');
+  let slider = document.getElementById('resolutionSlider');
+  let tooltip = document.getElementById('tooltip');
 
+  if (window.innerWidth < 768) {
+    slider.value = '412';
+    tooltip.textContent = slider.value + 'p';
+    tooltip.style.left = 0;
+  }
   slider.addEventListener('input', () => {
     const resolution = slider.value + 'p';
     tooltip.textContent = resolution;
@@ -466,4 +490,23 @@ document.addEventListener('DOMContentLoaded', async function() {
       sections.style.display = (sections.style.display === 'none' || sections.style.display === '') ? 'block' : 'none';
       chevron.style.transform = (sections.style.display === 'none' || sections.style.display === '') ? "rotate(360deg)" : "rotate(180deg)";
   });
+
+  function setupClipboardButton(buttonId, valueId) {
+    const button = document.getElementById(buttonId);
+    const value = document.getElementById(valueId).textContent;
+  
+    button.addEventListener('click', function () {
+        navigator.clipboard.writeText(value).then(() => {
+            button.innerHTML = `<ion-icon name="checkmark-done"></ion-icon>`;
+            setTimeout(() => {
+                button.innerHTML = `<ion-icon name="copy-outline"></ion-icon>`;
+            }, 3000);
+        });
+    });
+  }
+  
+  setupClipboardButton('btnApiKey', 'valueApiKey');
+  setupClipboardButton('btnApiKeyMobile', 'valueApiKeyMobile');
+
 });
+

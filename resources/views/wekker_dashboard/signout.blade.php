@@ -99,10 +99,16 @@
             </header>
             <div class="nav-build ms-2 d-flex gap-2 justify-content-end align-items-center">
                 <div class="dropdown profile d-flex justify-content-end">
-                    <button class="btn user border" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
-                        @auth
-                            <img src="{{ Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('wekker_dashboard/sources/logo/WEKKER_profile.png') }}" alt="">
-                        @endauth
+                    <button class="btn user border shadow shadow-sm border-primary" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
+                    @auth
+                        @php
+                            $profilePhotoPath = Auth::user()?->profile_photo_path;
+                            $profilePhoto = $profilePhotoPath && Storage::exists($profilePhotoPath) 
+                                            ? asset('storage/' . $profilePhotoPath) 
+                                            : asset('wekker_dashboard/sources/logo/WEKKER_profile.png');
+                        @endphp
+                        <img src="{{ $profilePhoto }}" alt="">
+                    @endauth
                     </button>
                     <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuProfile">
                         <li>
@@ -119,7 +125,7 @@
             </div>
         </div>
         <hr style="margin-top: 0.1em;">
-        <div class="container-fluid h-75 d-flex justify-content-center align-items-center bg-light">
+        <div class="container-fluid h-75 d-flex justify-content-center align-items-center">
             <div class="confirm w-50">
                 <div class="card shadow-lg border-0">
                     <div class="card-header text-center bg-primary text-white py-3" style="font-weight: 800; font-size: 1.5rem;">
@@ -130,13 +136,20 @@
                             <span class="fw-bold text-muted">Name:</span>
                             <span class="text-dark">{{ Auth::user()->name }}</span>
                         </div>
-                        <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
                             <span class="fw-bold text-muted">Email:</span>
                             <span class="text-dark">{{ Auth::user()->email }}</span>
                         </div>
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+                            <span class="fw-bold text-muted">Created At:</span>
+                            <span class="text-dark">{{ Auth::user()->created_at }}</span>
+                        </div>
                     </div>
                     <div class="card-footer bg-white d-flex justify-content-end py-2">
-                        <button type="button" class="btn btn-outline-danger px-4">Log Out</button>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="button" class="btn btn-outline-danger px-4" onclick="event.preventDefault(); this.closest('form').submit();">Sign Out</button>
+                        </form>
                     </div>
                 </div>
             </div>

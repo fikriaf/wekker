@@ -20,8 +20,9 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-// ------------------------- PROJECT ------------------------------------
+// ------------------------- MAIN-BUILDER ------------------------------------
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ApiWekkerRequestController;
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard/main-builder', [ProjectController::class, 'showMainBuilder'])->name('main.builder');
@@ -31,13 +32,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/main-builder/{uuid}/data', [ProjectController::class, 'getProjectData'])->name('projects.get');
     Route::get('/get-list-projects', [ProjectController::class, 'getListProject'])->name('projects.list');
     Route::delete('/delete-project/{uuid}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+    Route::post('/api/wekker_requests_generate', [ApiWekkerRequestController::class, 'GenerateWebPage']);
 });
 
 // ------------------------- DEVELOPER TOOLS ------------------------------------
+use App\Http\Controllers\DatabaseController;
 
 Route::get('/dashboard/developer-tool', function () {
     return view('wekker_dashboard.developer_tool');
 })->middleware(['auth', 'verified'])->name('developer.tool');
+
+Route::post('/create-database', [DatabaseController::class, 'createDatabase'])->name('create.database');
+Route::get('/get-info-database', [DatabaseController::class, 'getInfoDB'])->name('get.database');
 
 // ------------------------- FILE MANAGER ------------------------------------
 
@@ -68,3 +74,8 @@ Route::get('/dashboard/support-center', function () {
 Route::get('/dashboard/signout', function () {
     return view('wekker_dashboard.signout');
 })->middleware(['auth', 'verified'])->name('signout');
+
+// ------------------------- AI CHATBOT ------------------------------------
+
+use App\Http\Controllers\AssistantAIController;
+Route::post('/api/wekker_assistant', [AssistantAIController::class, 'responAI']);

@@ -1,10 +1,26 @@
 <x-guest-layout>
+    <!-- Iklan Atas -->
+    <div class="iklan-atas">
+            <div class="content">
+                <img src="{{asset('wekker_dashboard/sources/iklan/lazada-top.png')}}" alt="Iklan">
+                <br><br>
+                <img src="{{asset('wekker_dashboard/sources/iklan/lazada-top2.png')}}" alt="Iklan">
+                <div>
+                    <h3>Diskon Besar!</h3>
+                    <p>Promo akhir tahun, diskon hingga 70%! Belanja lebih hemat.</p>
+                </div>
+            </div>
+            <a class="btn btn-outline-info" href="https://www.google.com/url?url=https://www.lazada.co.id/products/jas-pria-blazer-pria-jas-wisuda-blazer-lamaran-jas-resmi-blazer-i6006462599-s11899308512.html%3Ffrom_gmc%3D1%26fl_tag%3D1&rct=j&q=&esrc=s&opi=95576897&sa=U&ved=0ahUKEwj46oOl4MKKAxXUwjgGHZxfBJ4QgOUECMIG&usg=AOvVaw3Z7V8pFfQZeyNa6OKEcWc8" target="_blank" >Belanja Sekarang</a>
+            <button class="close-iklan" onclick="closeAd()">✖</button>
+        </div>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
+        <div><strong><h1 style="font-size: 2rem !important;">Login</h1></strong></div>
+        <hr class="my-3">
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
@@ -33,6 +49,9 @@
         </div>
 
         <div class="flex items-center justify-end mt-4">
+            <a class="me-auto" href="{{route('register')}}">
+                <ion-icon name="arrow-undo-outline"></ion-icon>&nbsp;Register
+            </a>
             @if (Route::has('password.request'))
                 <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
                     {{ __('Forgot your password?') }}

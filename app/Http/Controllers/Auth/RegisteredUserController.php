@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+
 
 class RegisteredUserController extends Controller
 {
@@ -36,11 +39,17 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $dbName = 'user_' . uniqid();
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'api_key' => Str::random(23),
+            'expired' =>  Carbon::now()->addYear(),
+            'db_name' => $dbName,
         ]);
+
 
         event(new Registered($user));
 
@@ -48,4 +57,5 @@ class RegisteredUserController extends Controller
 
         return redirect(RouteServiceProvider::HOME);
     }
+
 }

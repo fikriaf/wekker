@@ -32,9 +32,9 @@
                             <span>Email  :</span>
                             <span class="email-user ms-2">{{ Auth::user()->email }}</span>
                         </div>
-                        <div class="d-flex border p-1 mt-3 justify-content-center">
+                        <div class="d-flex border p-1 mt-3 justify-content-center align-items-center">
                             <span>Limit Requests :</span>
-                            <span class="limit ms-2">3/3</span>
+                            <span class="limit ms-2 d-flex align-items-center gap-1">{{Auth::user()->total_request}} /<ion-icon name="infinite-outline" style="font-size:1.5rem;"></ion-icon></span>
                         </div>
                     </div>
                     <div class="w-100 d-flex rounded align-items-center border mt-3">
@@ -42,10 +42,10 @@
                             <span style="color: white;">API Key</span>
                         </div>
                         <div class="api-key ps-2" style="font-family: Consolas;">
-                            <span>{{ Auth::user()->api_key }}</span>
+                            <span id="valueApiKey">{{ Auth::user()->api_key }}</span>
                         </div>
                         <div class="copy-api ms-auto">
-                            <button class="btn d-flex" type="button"><ion-icon name="copy-outline"></ion-icon></button>
+                            <button class="btn d-flex" type="button" id="btnApiKey"><ion-icon name="copy-outline"></ion-icon></button>
                         </div>
                     </div>
                 </div>
@@ -62,7 +62,7 @@
     </div>
     <!-- Modal New Project -->
     <div class="modal fade" id="createProjectModal" tabindex="-1" aria-labelledby="createProjectModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="createProjectModalLabel">Create New Project</h5>
@@ -99,7 +99,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Save Project</button>
+                            <button type="submit" class="btn btn-primary" id="createProject">Save Project</button>
                         </div>
                     </form>
                 </div>
@@ -129,7 +129,7 @@
                         <label for="shareLink" class="form-label">Tautan Proyek</label>
                         <div class="input-group">
                             <input type="text" class="form-control" id="shareLink" value="" readonly>
-                            <button class="btn btn-outline-secondary" onclick="copyLink()">Salin Link</button>
+                            <button class="btn btn-outline-secondary" id="btnShare">Copy</button>
                         </div>
                     </div>
 
@@ -258,30 +258,27 @@
             </div>
             <div class="nav-build w-100 ms-2 d-flex gap-2 justify-content-center align-items-center">
                 <div class="dropdown menu">
-                    <button class="btn btn-secondary dropdown-toggle px-3 m-0 shadow-sm" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                        File
+                    <button class="btn dropdown-toggle text-white px-3 m-0 shadow-sm" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: var(--blue)">
+                        Menu
                     </button>
-                    <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuButton">
+                    <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuButton" style="background-color: var(--blue);">
                         <li>
-                        <a class="dropdown-item px-2" href="#" data-bs-toggle="modal" data-bs-target="#createProjectModal"><span><ion-icon name="document-outline"></ion-icon>&nbsp;&nbsp;</span>New Project</a>
+                        <a class="dropdown-item px-2 text-white" href="#" data-bs-toggle="modal" data-bs-target="#createProjectModal"><span><ion-icon name="document-outline"></ion-icon>&nbsp;&nbsp;</span>New Project</a>
                         </li>
                         <li>
-                        <a class="dropdown-item px-2" href="#" data-bs-toggle="modal" data-bs-target="#projectListModal" id="btnOpenFile"><span><ion-icon name="folder-outline"></ion-icon>&nbsp;&nbsp;</span>Open Project</a>
+                        <a class="dropdown-item px-2 text-white" href="#" data-bs-toggle="modal" data-bs-target="#projectListModal" id="btnOpenFile"><span><ion-icon name="folder-outline"></ion-icon>&nbsp;&nbsp;</span>Open Project</a>
                         </li>
                         <li>
-                        <a class="dropdown-item px-2" href="#"><span><ion-icon name="save-outline"></ion-icon>&nbsp;&nbsp;</span>Save As</a>
+                        <a class="dropdown-item px-2 text-white" href="#"><span><ion-icon name="code-download-outline"></ion-icon>&nbsp;&nbsp;</span>Download</a>
                         </li>
                         <li>
-                        <a class="dropdown-item px-2" href="#"><span><ion-icon name="code-download-outline"></ion-icon>&nbsp;&nbsp;</span>Download</a>
-                        </li>
-                        <li>
-                        <a class="dropdown-item px-2" href="#"><span><ion-icon name="settings-outline"></ion-icon>&nbsp;&nbsp;</span>Setting</a>
+                        <a class="dropdown-item px-2 text-white" href="{{route('setting')}}"><span><ion-icon name="settings-outline"></ion-icon>&nbsp;&nbsp;</span>Setting</a>
                         </li>
                     </ul>
                 </div>
                 <div class="project border d-flex align-items-center rounded w-100">
                     <button class="btn btn-project dropdown-toggle w-100 d-flex align-items-center justify-content-between" type="button" id="dropdownProject" data-bs-toggle="dropdown" aria-expanded="false">
-                        Project1
+                        None
                     </button>
                     <ul class="dropdown-menu w-100 px-1" aria-labelledby="dropdownProject">
                         <li class="d-flex align-items-center pb-2">
@@ -300,10 +297,16 @@
                     <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center gap-2" id="btnShareLink" data-bs-toggle="modal" data-bs-target="#shareModal"><ion-icon name="share-social-outline"></ion-icon>Bagikan</button>
                 </div>
                 <div class="dropdown profile d-flex justify-content-end">
-                    <button class="btn user border" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
-                        @auth
-                            <img src="{{ Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('wekker_dashboard/sources/logo/WEKKER_profile.png') }}" alt="">
-                        @endauth
+                    <button class="btn user border shadow shadow-sm border-primary" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
+                    @auth
+                        @php
+                            $profilePhotoPath = Auth::user()?->profile_photo_path;
+                            $profilePhoto = $profilePhotoPath && Storage::exists($profilePhotoPath) 
+                                            ? asset('storage/' . $profilePhotoPath) 
+                                            : asset('wekker_dashboard/sources/logo/WEKKER_profile.png');
+                        @endphp
+                        <img src="{{ $profilePhoto }}" alt="">
+                    @endauth
                     </button>
                     <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuProfile">
                         <li>
@@ -322,7 +325,7 @@
         <div class="row footbar d-flex py-2 ms-0 align-items-center border-top" style="position: fixed; z-index: 1000; background-color: white;">
             <div class="hover-up w-100 justify-content-center" style="position: absolute; top: -2rem; z-index: 999099999999;">
                 <input class="label-hover" type="checkbox" name="hover" id="hoverUp" style="display: none;">
-                <label class="px-3" for="hoverUp" style="cursor: pointer;">
+                <label class="px-3 rounded-2 bg-secondary" for="hoverUp" style="cursor: pointer; color: white;">
                     <i class="fas fa-angle-double-up"></i>
                 </label>
             </div>
@@ -330,7 +333,7 @@
                 <form class="d-flex align-items-center p-1 border rounded border-1 w-100 shadow" id="promptForm">
                     @csrf
                     <div class="d-flex flex-grow-1">
-                        <textarea class="form-textarea flex-grow-1" name="prompt" id="inputPrompt" placeholder="Create page streaming, with very good and responsive ui"
+                        <textarea class="form-textarea flex-grow-1" name="prompt" id="inputPrompt" placeholder="Create a system table CRUD (Create Read Update Delete)"
                         style="border: none; outline: none;"></textarea>
                     </div>
                     <div class="d-flex h-100 justify-content-center align-items-center">
@@ -607,9 +610,9 @@
                             <span>Email  :</span>
                             <span class="email-user ms-2">{{ Auth::user()->email }}</span>
                         </div>
-                        <div class="d-flex border p-1 mt-1 justify-content-center">
+                        <div class="d-flex border p-1 mt-1 justify-content-center align-items-center">
                             <span>Limit Requests :</span>
-                            <span class="limit ms-2">3/3</span>
+                            <span class="limit ms-2 d-flex align-items-center gap-1"">{{Auth::user()->total_request}} /<ion-icon name="infinite-outline" style="font-size:1.5rem;"></ion-icon></span>
                         </div>
                     </div>
                     <div class="w-100 d-flex rounded align-items-center border mt-3">
@@ -617,10 +620,10 @@
                             <span style="color: white;">API Key</span>
                         </div>
                         <div class="api-key ps-2" style="font-family: Consolas;">
-                            <span>{{ Auth::user()->api_key }}</span>
+                            <span id="valueApiKeyMobile">{{ Auth::user()->api_key }}</span>
                         </div>
                         <div class="copy-api ms-auto">
-                            <button class="btn d-flex" type="button"><ion-icon name="copy-outline"></ion-icon></button>
+                            <button class="btn d-flex" type="button" id="btnApiKeyMobile"><ion-icon name="copy-outline"></ion-icon></button>
                         </div>
                     </div>
                 </div>
