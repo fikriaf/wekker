@@ -49,7 +49,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/delete-project/{uuid}', [ProjectController::class, 'destroy'])->name('projects.destroy');
 });
 
-Route::post('/wekker_requests_generate', [ApiWekkerRequestController::class, 'GenerateWebPage'])
+Route::post('/api/wekker_requests_generate', [ApiWekkerRequestController::class, 'GenerateWebPage'])
     ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
 
 // ------------------------- DEVELOPER TOOLS ------------------------------------

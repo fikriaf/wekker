@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const value = document.getElementById("valueApiKey");
   const valuePrompt = document.getElementById('inputPrompt');
   const selectedItems = document.getElementById('selectedItems');
-
+  
   function getCookie(name) {
     let nameEQ = name + "=";
     let ca = document.cookie.split(';');
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       valuePrompt.value = promptbegin;
       valuePrompt.textContent = promptbegin;
   }
-
+  
   submitPrompt.addEventListener('click', async function (e) {
     e.preventDefault();
 
@@ -41,7 +41,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     
     const inputPrompt = valuePrompt.value;
 
-    console.log(selectedItems);
     try {
       const response = await fetch('/api/wekker_requests_generate', {
         method: 'POST',
@@ -71,8 +70,8 @@ document.addEventListener("DOMContentLoaded", async () => {
               saveSyntaxToLocal('html', data.html.code??null);
             }
           } catch (error) {
-              console.error("No Code CSS");
-              saveSyntaxToLocal('html', data.html.code??null);
+              console.error("No Code HTML");
+              await typeTextEffect('', document.getElementById('codeHTML'), 1);
           };
           try {
               if (data.css.code) {
@@ -87,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               }
           } catch (error) {
               console.error("No Code CSS");
-              saveSyntaxToLocal('html', data.css.code??null);
+              await typeTextEffect('', document.getElementById('codeCSS'), 1);
           };
           try {
               if (data.javascript.code) {
@@ -98,11 +97,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                   const codeJS = document.getElementById('codeJS');
                   await typeTextEffect(data.javascript.code??null, codeJS, 1);
                   Prism.highlightElement(codeJS);
-                  saveSyntaxToLocal('js', data.javascript.code??null);
+                  saveSyntaxToLocal('js', data.css.javascript??null);
               }
           } catch (error) {
               console.log("No Code JS");
-              saveSyntaxToLocal('html', data.javascript.code??null);
+              await typeTextEffect('', document.getElementById('codeJS'), 1);
           };
       } else {
         console.log("Respons JSON tidak valid atau kunci 'html' tidak ditemukan.");

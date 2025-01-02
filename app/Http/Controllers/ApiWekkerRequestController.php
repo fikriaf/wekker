@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -11,19 +10,13 @@ class ApiWekkerRequestController extends Controller
     public function GenerateWebPage(Request $request) {
         session_start();
         set_time_limit(0);
+        
         header('Content-Type: text/html; charset=utf-8');
         header('Cache-Control: no-cache');
         header('Connection: keep-alive');
         header("Access-Control-Allow-Origin: *");
         header("Access-Control-Allow-Headers: Content-Type");
         header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
-
-        $validated = $request->validate([
-            'api_key' => 'required|string',
-            'prompt' => 'required|string',
-            'materials' => 'nullable|string',
-        ]);
-
 
         if (!isset($_SESSION['hist1'])) {
             $_SESSION['hist1'] = [];
