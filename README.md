@@ -13,7 +13,8 @@ Wekker is a Laravel-based platform designed to make it easier for users to creat
   ![image](https://github.com/user-attachments/assets/5a729bd5-603c-49b4-b9e8-1f2d95930075)
 
 ## Our Team
-- @fikriaf
-- @alfarissm
-  
+- [@fikriaf](https://github.com/fikriaf)
+- [@alfarissm](https://github.com/alfarissm)
+
 ![image](https://github.com/user-attachments/assets/e1f7705f-44bb-4175-a9e4-e3d98a609564)
+
