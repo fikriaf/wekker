@@ -11,6 +11,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   const valuePrompt = document.getElementById('inputPrompt');
   const selectedItems = document.getElementById('selectedItems');
 
+  function getCookie(name) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(nameEQ) === 0) {
+            return decodeURIComponent(c.substring(nameEQ.length, c.length));
+        }
+    }
+    return null;
+  }
+  function deleteCookie(name) {
+      document.cookie = name + '=; Max-Age=-1; path=/';
+  }
+
+  let promptbegin = getCookie('promptbegin');
+
+  if (promptbegin) {
+      console.log('Cookie ditemukan! Nilai cookie: ' + promptbegin);
+      valuePrompt.value = promptbegin;
+      valuePrompt.textContent = promptbegin;
+  }
+
   submitPrompt.addEventListener('click', async function (e) {
     e.preventDefault();
 
@@ -89,6 +112,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.log('Sorry, nothing response code from server. Please input prompt correctly !!!');
     }
     document.getElementById("loadingGenerate").style.display = 'none';
+    if (promptbegin) {
+        console.log('Cookie ditemukan! Nilai cookie: ' + promptbegin);
+        valuePrompt.value = "";
+        valuePrompt.textContent = "";
+        deleteCookie('promptbegin');
+    }
   });
 
   const getFromDB = await fetch(`/dashboard/main-builder/${uuid}/data`, {

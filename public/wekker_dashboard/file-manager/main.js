@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let activeContent;
   const projectList = document.getElementById('projectList');
   let showFiles = document.getElementById('showFiles');
+  const btnProject = document.getElementById('btnProject');
 
   const getList = await fetch(`/get-list-projects`, {
     method: 'GET',

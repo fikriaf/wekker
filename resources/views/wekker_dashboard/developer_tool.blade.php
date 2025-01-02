@@ -86,7 +86,7 @@
     <!-- ========================= Main ==================== -->
     <div class="main">
         <div class="topbar px-4" style="margin-left: 1.5rem;">
-            <div class="toggle">
+            <div class="toggle ps-1">
                 <ion-icon class="menu-outline" name="menu-outline"></ion-icon>
             </div>
             <div class="close-toggle">
@@ -101,13 +101,7 @@
                 <div class="dropdown profile d-flex justify-content-end">
                     <button class="btn user border shadow shadow-sm border-primary" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
                     @auth
-                        @php
-                            $profilePhotoPath = Auth::user()?->profile_photo_path;
-                            $profilePhoto = $profilePhotoPath && Storage::exists($profilePhotoPath) 
-                                            ? asset('storage/' . $profilePhotoPath) 
-                                            : asset('wekker_dashboard/sources/logo/WEKKER_profile.png');
-                        @endphp
-                        <img src="{{ $profilePhoto }}" alt="">
+                        <img id="photo-preview" src="{{Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('wekker_dashboard/sources/logo/WEKKER_profile.png')}}" alt="">
                     @endauth
                     </button>
                     <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuProfile">
@@ -146,13 +140,15 @@
                     </li>
                 </ul>
                 <div class="tab-content">  
-                    <div class="tab-pane w-100 h-100 position-absolute bg-dark bg-opacity-75 justify-content-center align-items-center" id="panelCreateDB" style="z-index: 9;">
+                    <div class="tab-pane d-flex w-100 position-absolute bg-dark bg-opacity-75 justify-content-center align-items-center" id="panelCreateDB" style="z-index: 9; height: 110vh;">
                         <div class="text-center bg-white p-4 rounded shadow">
-                            <div class="spinner-border text-primary mx-5" id="SpinnerBorder"></div>
-                            <div class="text-primary mx-5" id="successCreate" style="font-size: 4rem;"><ion-icon name="checkmark-circle"></ion-icon></div>
-                            <div id="infoEmptyDB">
-                                <h4 class="mb-3">Your database is not yet available</h4>
-                                <button class="btn btn-primary" id="btnCreateDB">Create Database</button>
+                            <!-- <div class="spinner-border text-primary mx-5" id="SpinnerBorder"></div>
+                            <div class="text-primary mx-5" id="successCreate" style="font-size: 4rem;"><ion-icon name="checkmark-circle"></ion-icon></div> -->
+                            <div id="infoEmptyDB" class="card text-center shadow-lg mx-auto my-1 p-4" style="max-width: 450px; background-color: #f1f1f1;">
+                                <div class="card-body">
+                                    <h4 class="card-title text-danger display-6" style="font-weight:600;">Access Denied</h4>
+                                    <p class="card-text text-dark lead">You're not a Wekker Admin</p>
+                                </div>
                             </div>
                         </div>
                     </div>                  
@@ -238,8 +234,8 @@
                                     <tbody>
                                         <tr>
                                             <td>1</td>
-                                            <td>John Doe</td>
-                                            <td>johndoe@example.com</td>
+                                            <td></td>
+                                            <td></td>
                                             <td>
                                                 <button class="btn btn-warning btn-sm">Edit</button>
                                                 <button class="btn btn-danger btn-sm">Delete</button>

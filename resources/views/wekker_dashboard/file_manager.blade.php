@@ -8,6 +8,52 @@
 @endsection
     
 @section("content")
+<!-- Modal New Project -->
+<div class="modal fade" id="createProjectModal" tabindex="-1" aria-labelledby="createProjectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createProjectModalLabel">Create New Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Form untuk proyek baru -->
+                    <form action="{{ route('projects.create') }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Project Name:</label>
+                            <input type="text" name="name" pattern="^\S+$" title="No spaces allowed" id="name" class="form-control">
+                        </div>
+                        <button type="button" class="btn rounded-0 btn-secondary border-bottom d-flex align-items-center" id="toggleSections">Add Direct Input <span> </span> <ion-icon id="chevronDown" name="chevron-down-outline"></ion-icon></button>
+                        <!-- Sections for HTML, CSS, JavaScript -->
+                        <div id="sections" class="mb-3" style="display:none;">
+                            <!-- HTML Section -->
+                            <div class="mb-3">
+                                <label for="html" class="form-label">HTML:</label>
+                                <textarea name="html" id="html" class="form-control" rows="10"></textarea>
+                            </div>
+
+                            <!-- CSS Section -->
+                            <div class="mb-3">
+                                <label for="css" class="form-label">CSS:</label>
+                                <textarea name="css" id="css" class="form-control" rows="10"></textarea>
+                            </div>
+
+                            <!-- JavaScript Section -->
+                            <div class="mb-3">
+                                <label for="javascript" class="form-label">JavaScript:</label>
+                                <textarea name="javascript" id="javascript" class="form-control" rows="10"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" id="createProject">Save Project</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="navigation d-flex" style="font-weight: 500;">
         <ul class="p-0">
             <li>
@@ -102,13 +148,7 @@
                 <div class="dropdown profile d-flex justify-content-end">
                     <button class="btn user border shadow shadow-sm border-primary" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
                     @auth
-                        @php
-                            $profilePhotoPath = Auth::user()?->profile_photo_path;
-                            $profilePhoto = $profilePhotoPath && Storage::exists($profilePhotoPath) 
-                                            ? asset('storage/' . $profilePhotoPath) 
-                                            : asset('wekker_dashboard/sources/logo/WEKKER_profile.png');
-                        @endphp
-                        <img src="{{ $profilePhoto }}" alt="">
+                        <img id="photo-preview" src="{{Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('wekker_dashboard/sources/logo/WEKKER_profile.png')}}" alt="">
                     @endauth
                     </button>
                     <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuProfile">
@@ -137,7 +177,7 @@
                             <h5 class="p-0 m-0">Root</h5>
                         </div>
                         <div class="d-flex" id="btnProject">
-                            <button type="button" class="btn btn-primary d-flex add-project"><ion-icon name="add" style="font-size: 1.3rem; font-weight: 900;"></ion-icon></button>
+                            <button type="button" class="btn btn-primary d-flex add-project" data-bs-toggle="modal" data-bs-target="#createProjectModal"><ion-icon name="add" style="font-size: 1.3rem; font-weight: 900;"></ion-icon></button>
                         </div>
                     </div>
                     <ul class="list-group" id="projectList">

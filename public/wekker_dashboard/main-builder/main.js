@@ -1,6 +1,5 @@
 let lastSessionDatas = { html: '', css: '', js: '' };
 document.addEventListener('DOMContentLoaded', async function() {
-
   const createProject = document.getElementById('createProject');
   createProject.addEventListener('click', () => {
     localStorage.setItem('html', null);
@@ -78,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
   const btnShare = document.getElementById('btnShare');
   btnShare.addEventListener('click', function () {
-    navigator.clipboard.writeText(shareLink).then(() => {
+    navigator.clipboard.writeText(shareLink.value).then(() => {
       btnShare.textContent = '';
       btnShare.innerHTML = `<ion-icon name="checkmark-done"></ion-icon>`;
       setTimeout(() => {

@@ -13,9 +13,6 @@ class AssistantAIController extends Controller
         header('Cache-Control: no-cache');
         header('Connection: keep-alive');
 
-        flush();
-        ob_flush();
-
         $hashnya = "l9hdjdc60e";
         $url = "https://qwen-qwen1-5-110b-chat-demo.hf.space/queue/join?__theme=light";
         $url_res = "https://qwen-qwen1-5-110b-chat-demo.hf.space/queue/data?session_hash=" . $hashnya;

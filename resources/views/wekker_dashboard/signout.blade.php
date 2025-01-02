@@ -101,13 +101,7 @@
                 <div class="dropdown profile d-flex justify-content-end">
                     <button class="btn user border shadow shadow-sm border-primary" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
                     @auth
-                        @php
-                            $profilePhotoPath = Auth::user()?->profile_photo_path;
-                            $profilePhoto = $profilePhotoPath && Storage::exists($profilePhotoPath) 
-                                            ? asset('storage/' . $profilePhotoPath) 
-                                            : asset('wekker_dashboard/sources/logo/WEKKER_profile.png');
-                        @endphp
-                        <img src="{{ $profilePhoto }}" alt="">
+                        <img id="photo-preview" src="{{Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('wekker_dashboard/sources/logo/WEKKER_profile.png')}}" alt="">
                     @endauth
                     </button>
                     <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuProfile">

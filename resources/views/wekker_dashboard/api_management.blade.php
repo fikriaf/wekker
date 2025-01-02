@@ -4,7 +4,7 @@
 
 @section("stylesheet")
     <link rel="stylesheet" href="{{asset('wekker_dashboard/sources/prismjs/prism.css')}}">
-    <link rel="stylesheet" href="{{asset('wekker_dashboard/developer-tool/style.css')}}">
+    <link rel="stylesheet" href="{{asset('wekker_dashboard/api-management/style.css')}}">
 @endsection
     
 @section("content")
@@ -102,13 +102,7 @@
                 <div class="dropdown profile d-flex justify-content-end">
                     <button class="btn user border shadow shadow-sm border-primary" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
                     @auth
-                        @php
-                            $profilePhotoPath = Auth::user()?->profile_photo_path;
-                            $profilePhoto = $profilePhotoPath && Storage::exists($profilePhotoPath) 
-                                            ? asset('storage/' . $profilePhotoPath) 
-                                            : asset('wekker_dashboard/sources/logo/WEKKER_profile.png');
-                        @endphp
-                        <img src="{{ $profilePhoto }}" alt="">
+                        <img id="photo-preview" src="{{Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('wekker_dashboard/sources/logo/WEKKER_profile.png')}}" alt="">
                     @endauth
                     </button>
                     <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuProfile">
@@ -138,7 +132,7 @@
                 <div class="d-flex align-items-center justify-content-center mb-4">
                     <div class="border rounded px-4 py-2 bg-light d-inline-flex align-items-center" 
                         style="font-family: Consolas, monospace; font-size: 1.2rem; letter-spacing: 0.05rem;" id="valueApiKey">{{ Auth::user()->api_key }}</div>
-                    <button class="btn btn-outline-primary btn-sm ms-3 px-3 py-2" id="copyApiKey">
+                    <button class="btn btn-outline-primary btn-haruscopy btn-sm ms-3 px-3 py-2" id="copyApiKey">
                         <ion-icon name="copy-outline"></ion-icon> Copy
                     </button>
                 </div>
@@ -205,7 +199,7 @@
                         <p>Use the following code to integrate the API in Python:</p>
                         <pre class="bg-dark text-light p-3 rounded language-python"><code>import requests
 
-url = '/api/wekker_requests_generate'
+url = 'https://wekker.my.id/api/wekker_api_request.php'
 headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
 }
@@ -223,7 +217,7 @@ print(response.text)</code></pre>
                     <div class="tab-pane fade" id="javascript" role="tabpanel" aria-labelledby="javascript-tab">
                         <h5>JavaScript Instructions</h5>
                         <p>Use the following code to integrate the API in JavaScript:</p>
-                        <pre class="bg-dark text-light p-3 rounded language-javascript"><code>const response = await fetch('/api/wekker_requests_generate', {
+                        <pre class="bg-dark text-light p-3 rounded language-javascript"><code>const response = await fetch('https://wekker.my.id/api/wekker_api_request.php', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -239,7 +233,7 @@ console.log(await response.json());</code></pre>
                     <div class="tab-pane fade" id="php" role="tabpanel" aria-labelledby="php-tab">
                         <h5>PHP Instructions</h5>
                         <p>Use the following code to integrate the API in PHP:</p>
-                        <pre class="bg-dark text-light p-3 rounded language-php"><code>$url = '/api/wekker_requests_generate';
+                        <pre class="bg-dark text-light p-3 rounded language-php"><code>$url = 'https://wekker.my.id/api/wekker_api_request.php';
 $data = http_build_query([
     'prompt' => 'Create Sign Up Form Using HTML CSS JS',
     'api_key' => 'YOUR_API_KEY',
@@ -274,7 +268,7 @@ import java.net.URL;
 public class Main {
     public static void main(String[] args) {
         try {
-            String url = "https://your-api-endpoint.com/api/wekker_requests_generate";
+            String url = "https://your-api-endpoint.comhttps://wekker.my.id/api/wekker_api_request.php";
             String data = "prompt=Create+Sign+Up+Form+Using+HTML+CSS+JS&api_key=YOUR_API_KEY&materials=Bootstrap%2C+Font+Awesome%2C+JQuery";
 
             HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
@@ -302,7 +296,7 @@ public class Main {
                         <pre class="bg-dark text-light p-3 rounded language-ruby"><code>require 'net/http'
 require 'uri'
 
-uri = URI.parse('/api/wekker_requests_generate')
+uri = URI.parse('https://wekker.my.id/api/wekker_api_request.php')
 request = Net::HTTP::Post.new(uri)
 request["Content-Type"] = "application/x-www-form-urlencoded"
 request["X-CSRF-TOKEN"] = "<CSRF_TOKEN_HERE>"
@@ -324,7 +318,7 @@ class Program
     static async System.Threading.Tasks.Task Main(string[] args)
     {
         using var client = new HttpClient();
-        var url = "https://your-api-endpoint.com/api/wekker_requests_generate";
+        var url = "https://your-api-endpoint.comhttps://wekker.my.id/api/wekker_api_request.php";
         var data = "prompt=Create+Sign+Up+Form+Using+HTML+CSS+JS&api_key=YOUR_API_KEY&materials=Bootstrap%2C+Font+Awesome%2C+JQuery";
 
         var content = new StringContent(data, Encoding.UTF8, "application/x-www-form-urlencoded");
@@ -349,7 +343,7 @@ import (
 )
 
 func main() {
-	url := "https://your-api-endpoint.com/api/wekker_requests_generate"
+	url := "https://your-api-endpoint.comhttps://wekker.my.id/api/wekker_api_request.php"
 	data := "prompt=Create+Sign+Up+Form+Using+HTML+CSS+JS&api_key=YOUR_API_KEY&materials=Bootstrap%2C+Font+Awesome%2C+JQuery"
 
 	req, _ := http.NewRequest("POST", url, bytes.NewBufferString(data))
@@ -373,7 +367,7 @@ func main() {
 
 fn main() {
     let client = Client::new();
-    let url = "https://your-api-endpoint.com/api/wekker_requests_generate";
+    let url = "https://your-api-endpoint.comhttps://wekker.my.id/api/wekker_api_request.php";
     let data = "prompt=Create+Sign+Up+Form+Using+HTML+CSS+JS&api_key=YOUR_API_KEY&materials=Bootstrap%2C+Font+Awesome%2C+JQuery";
 
     let response = client.post(url)

@@ -23,7 +23,7 @@
             </label>
             <div class="flex items-center gap-4">
                 <div class="w-20 h-20 rounded-full overflow-hidden border border-gray-200">
-                    <img id="photo-preview" src="{{ $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : asset('default-avatar.jpg') }}" alt="Profile Photo" class="w-full h-full object-cover">
+                    <img id="photo-preview" src="{{ $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : asset('wekker_dashboard/sources/logo/WEKKER_profile.png')}}" alt="Profile Photo" class="w-full h-full object-cover">
                 </div>
                 <input type="file" name="profile_photo" id="profile_photo" accept="image/*" class="file-input border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             </div>

@@ -498,7 +498,7 @@ body {
     width: 100%;
   }
   .main {
-    height: calc(100%);
+    height: calc(140vh);
   }
 
   .center-main {

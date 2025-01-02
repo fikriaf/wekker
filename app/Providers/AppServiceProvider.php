@@ -20,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // View::addNamespace('layouts_begin_wekker', resource_path('views/layouts/wekker_dashboard'));
+        View::addNamespace('layouts_begin_wekker', resource_path('views/layouts/wekker_begin'));
         View::addNamespace('layouts_dashboard_wekker', resource_path('views/layouts/wekker_dashboard'));
     }
 }

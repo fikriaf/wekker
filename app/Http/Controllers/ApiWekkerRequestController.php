@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
+use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ApiWekkerRequestController extends Controller
 {
@@ -16,8 +18,12 @@ class ApiWekkerRequestController extends Controller
         header("Access-Control-Allow-Headers: Content-Type");
         header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
 
-        flush();
-        ob_flush();
+        $validated = $request->validate([
+            'api_key' => 'required|string',
+            'prompt' => 'required|string',
+            'materials' => 'nullable|string',
+        ]);
+
 
         if (!isset($_SESSION['hist1'])) {
             $_SESSION['hist1'] = [];
@@ -39,11 +45,14 @@ class ApiWekkerRequestController extends Controller
 
             error_log("Final Response: " . json_encode( $request->user()->api_key));
 
-
-            if ($api_key != $request->user()->api_key) {
-                $error["invalid"] = "API Key Invalid. Please Check Your Api Key!";
-                error_log("Invalid API Key");
-                exit;
+            $isValid = DB::table('users')
+                    ->where('api_key', $api_key)
+                    ->exists();    
+                    
+            if (!$isValid) {
+                return response()->json([
+                    'error' => 'API Key Invalid. Please Check Your Api Key!'
+                ], 401);
             } else if (!$request->has('prompt')) {
                 $error["error"] = "Error parameter prompt. Please insert value to parameter prompt!";
                 error_log("Missing prompt");
@@ -53,9 +62,8 @@ class ApiWekkerRequestController extends Controller
                 $response = $this->aiku($prompt, $material);
                 $final = $this->extractAndReturnJSON($response);
                 if ($final){
-                    $request->user()->update([
-                        'total_request' => $request->user()->total_request + 1
-                    ]);
+                    DB::table('users')->where('api_key', $api_key)
+                                            ->increment('total_request');  
                 };
                 return response()->json($final);
             }

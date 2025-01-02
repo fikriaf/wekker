@@ -81,6 +81,35 @@ document.addEventListener('DOMContentLoaded', async () => {
   let closeToggle = document.querySelector(".close-toggle");
   let navigation = document.querySelector(".navigation");
   let main = document.querySelector(".main");
+  const messageForm = document.getElementById('messageForm')
+  
+  messageForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(this);
+      const responseMessage = document.getElementById('responseMessage');
+
+      try {
+          const response = await fetch("/send-message", {
+              method: "POST",
+              headers: {
+                  "X-CSRF-TOKEN": document.querySelector('input[name=_token]').value
+              },
+              body: formData
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+              responseMessage.innerHTML = `<div class="alert alert-success">${result.success}</div>`;
+              this.reset();
+          } else {
+              responseMessage.innerHTML = `<div class="alert alert-danger">${result.error || 'An error occurred'}</div>`;
+          }
+      } catch (error) {
+          responseMessage.innerHTML = `<div class="alert alert-danger">Failed to send message</div>`;
+      }
+  });
 
   function handleClickBehavior() {
     if (window.innerWidth < 768) {

@@ -1,0 +1,33 @@
+body {
+  display: -ms-flexbox;
+  display: -webkit-box;
+  display: flex;
+  -ms-flex-align: center;
+  -ms-flex-pack: center;
+  -webkit-box-align: center;
+  background: linear-gradient(15deg,#57575b,#231a6f);
+  }
+  
+  
+  #user-input {
+    border: none;
+    outline: none;
+  }
+  
+  #chat-container {
+    border: 1px solid #1c3557;
+  }
+  
+  #send-btn {
+    background-color: #615353;
+    border: none;
+  }
+  
+  #send-btn:hover {
+    background-color: #5a567c;
+  }
+  
+  .btn-outline-light:hover {
+    background-color: #1c3557;
+  }
+  

@@ -101,13 +101,7 @@
                 <div class="dropdown profile d-flex justify-content-end">
                     <button class="btn user border shadow shadow-sm border-primary" type="button" id="dropdownMenuProfile" data-bs-toggle="dropdown" aria-expanded="false">
                     @auth
-                        @php
-                            $profilePhotoPath = Auth::user()?->profile_photo_path;
-                            $profilePhoto = $profilePhotoPath && Storage::exists($profilePhotoPath) 
-                                            ? asset('storage/' . $profilePhotoPath) 
-                                            : asset('wekker_dashboard/sources/logo/WEKKER_profile.png');
-                        @endphp
-                        <img src="{{ $profilePhoto }}" alt="">
+                        <img id="photo-preview" src="{{Auth::user()->profile_photo_path ? asset('storage/' . Auth::user()->profile_photo_path) : asset('wekker_dashboard/sources/logo/WEKKER_profile.png')}}" alt="">
                     @endauth
                     </button>
                     <ul class="dropdown-menu p-1" aria-labelledby="dropdownMenuProfile">
@@ -148,7 +142,7 @@
                             <div class="mb-4">
                                 <i class="bi bi-question-circle fs-1 text-success"></i>
                             </div>
-                            <h5 class="card-title">Pertanyaan & Permasalahan</h5>
+                            <h5 class="card-title">FAQ</h5>
                             <p class="card-text">Find answers to common questions or submit your own issues for support.</p>
                             <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#faqModal">Submit Question</button>
                         </div>
@@ -200,17 +194,19 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <form>
-                            <div class="mb-3">
-                                <label for="question" class="form-label">Your Question</label>
-                                <textarea class="form-control" id="question" rows="3" placeholder="Describe your issue or ask a question"></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Your Email</label>
-                                <input type="email" class="form-control" id="email" placeholder="Enter your email">
-                            </div>
-                            <button type="submit" class="btn btn-success w-100">Submit</button>
-                        </form>
+                    <form id="messageForm">
+                        @csrf
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea name="message" class="form-control" id="message" rows="3" placeholder="Describe your issue or ask a question"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Your Email</label>
+                            <input type="email" name="email" class="form-control" id="email" placeholder="Enter your email">
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Submit</button>
+                        <div id="responseMessage" class="mt-3"></div>
+                    </form>
                     </div>
                 </div>
             </div>
