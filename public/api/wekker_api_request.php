@@ -88,23 +88,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 function ai($teksnya, $materials) {
-    $hashnya = "l9hdjdc60e";
-    $url = "https://qwen-qwen1-5-110b-chat-demo.hf.space/queue/join?__theme=light";
-    $url_res = "https://qwen-qwen1-5-110b-chat-demo.hf.space/queue/data?session_hash=". $hashnya;
+    $hashnya = "czva0ffte";
+    $url = "https://qwen-qwen3-demo.hf.space/queue/join?__theme=light";
+    $url_res = "https://qwen-qwen3-demo.hf.space/queue/data?session_hash=". $hashnya;
     $ua = file_exists('ua.txt') ? trim(file('ua.txt')[array_rand(file('ua.txt'))]) : "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36";
 
     $teks = $materials ? $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML. Harus mengandung komponen: ".$materials : $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML";
     $data = [
         "data" => [
             $teks,
-            $_SESSION['hist1'],
-            "NO EXPLANATION, DIRECT CODING. You are a webpage creation machine. You can only create web code using HTML, CSS and JS separately."
+            [
+                "model" => "qwen3-235b-a22b",
+                "sys_prompt" => "NO EXPLANATION, DIRECT CODING. You are a webpage creation machine. You can only create web code using HTML, CSS and JS separately.",
+                "thinking_budget" => 38,
+            ],
+            [],
+            []
         ],
-        "event_data" => null,
-        "fn_index" => 0,
-        "trigger_id" => 12,
-        "session_hash" => $hashnya
+        "event_data" => "null",
+        "fn_index" => 13,
+        "trigger_id" => 31,
+        "session_hash" => $hashnya,
     ];
+    // $data = [
+    //     "data" => [
+    //         $teks,
+    //         $_SESSION['hist1'],
+    //         "NO EXPLANATION, DIRECT CODING. You are a webpage creation machine. You can only create web code using HTML, CSS and JS separately."
+    //     ],
+    //     "event_data" => null,
+    //     "fn_index" => 0,
+    //     "trigger_id" => 12,
+    //     "session_hash" => $hashnya
+    // ];
     
     $jsonData = json_encode($data);
 
@@ -181,7 +197,7 @@ function ai($teksnya, $materials) {
                         }
                     }
                     
-                    foreach ($messages as $message) {                    
+                    foreach ($messages as $message) {
                         if (strpos($message, "process_generating") !== false) {
                             try {
                                 $meshh = preg_replace('/^data: /', '', $message);
