@@ -33,91 +33,316 @@ document.addEventListener("DOMContentLoaded", async () => {
       valuePrompt.value = promptbegin;
       valuePrompt.textContent = promptbegin;
   }
-  
+
+
   submitPrompt.addEventListener('click', async function (e) {
     e.preventDefault();
-
     document.getElementById("loadingGenerate").style.display = 'flex';
-    
+
     const inputPrompt = valuePrompt.value;
 
-    try {
-      const response = await fetch('/api/wekker_requests_generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        },
-        body: `prompt=${encodeURIComponent(inputPrompt)}&api_key=${encodeURIComponent(value.textContent)}&materials=${encodeURIComponent(selectedItems.textContent)}`,
-      });
+    const response = await fetch('/api/wekker_requests_generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      },
+      body: `prompt=${encodeURIComponent(inputPrompt)}&api_key=${encodeURIComponent(value.textContent)}&materials=${encodeURIComponent(selectedItems.textContent)}`,
+    });
 
-      if (!response.ok) {
-        console.log('Server response not OK');
-      }
+    // if (!response.ok || !response.body) {
+    //   console.error("Server response error");
+    //   return;
+    // }
 
-      const data = await response.json();
-      
-      if (data) {
-          try {
-            if (data.html.code) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+
+    let fullText = '';
+    let parsedJSON = null;
+
+    const codeHTML = document.getElementById("codeHTML");
+    const codeCSS = document.getElementById("codeCSS");
+    const codeJS = document.getElementById("codeJS");
+
+    codeHTML.textContent = '';
+    codeCSS.textContent = '';
+    codeJS.textContent = '';
+
+    let tickBuffer = '';
+    let currentLang = '';
+    let isCapturing = false;
+    let bufferPerLang = '';
+    let codeBuffers = { html: '', css: '', js: '' };
+    let stopParsing = false;
+    
+    while (!stopParsing) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+
+      for (let i = 0; i < chunk.length; i++) {
+        const char = chunk[i];
+
+        // Tambah ke tickBuffer (max 3 char)
+        tickBuffer = (tickBuffer + char).slice(-3);
+
+        // Awal blok kode (``` deteksi 3 char)
+        if (!isCapturing && tickBuffer === '```') {
+          isCapturing = true;
+          currentLang = '';
+          bufferPerLang = '';
+          tickBuffer = '';
+          continue;
+        }
+
+        // Tangkap nama bahasa setelah ```
+        if (isCapturing && !currentLang) {
+          document.getElementById("loadingGenerate").style.display = 'none';
+          if (char === '\n') {
+            currentLang = bufferPerLang.trim().toLowerCase();
+            bufferPerLang = '';
+
+            if (['html', 'css', 'js', 'javascript'].includes(currentLang)) {
+              const langKey = currentLang === 'javascript' ? 'js' : currentLang;
+              
               document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
               document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
-              document.querySelector(".btn-html").classList.add('active');
-              document.querySelector(".code-html").classList.add('active');
-              const codeHTML = document.getElementById('codeHTML');
-              await typeTextEffect(data.html.code??null, codeHTML, 1);
-              Prism.highlightElement(codeHTML);
-              saveSyntaxToLocal('html', data.html.code??null);
+              document.querySelector(".btn-"+ langKey.toLocaleLowerCase())?.classList.add('active');
+              document.querySelector(".code-"+ langKey.toLocaleLowerCase())?.classList.add('active');
             }
-          } catch (error) {
-              console.error("No Code HTML");
-              await typeTextEffect('', document.getElementById('codeHTML'), 1);
-          };
-          try {
-              if (data.css.code) {
-                  document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
-                  document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
-                  document.querySelector(".btn-css").classList.add('active');
-                  document.querySelector(".code-css").classList.add('active');
-                  const codeCSS = document.getElementById('codeCSS');
-                  await typeTextEffect(data.css.code??null, codeCSS, 1);
-                  Prism.highlightElement(codeCSS);
-                  saveSyntaxToLocal('css', data.css.code??null);
-              }
-          } catch (error) {
-              console.error("No Code CSS");
-              await typeTextEffect('', document.getElementById('codeCSS'), 1);
-          };
-          try {
-              if (data.javascript.code) {
-                  document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
-                  document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
-                  document.querySelector(".btn-js").classList.add('active');
-                  document.querySelector(".code-js").classList.add('active');
-                  const codeJS = document.getElementById('codeJS');
-                  await typeTextEffect(data.javascript.code??null, codeJS, 1);
-                  Prism.highlightElement(codeJS);
-                  saveSyntaxToLocal('js', data.css.javascript??null);
-              }
-          } catch (error) {
-              console.log("No Code JS");
-              await typeTextEffect('', document.getElementById('codeJS'), 1);
-          };
-      } else {
-        console.log("Respons JSON tidak valid atau kunci 'html' tidak ditemukan.");
-      };
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      console.log('Sorry, nothing response code from server. Please input prompt correctly !!!');
+
+            continue;
+          }
+          bufferPerLang += char;
+          continue;
+        }
+
+        // Deteksi akhir blok kode
+        if (isCapturing && tickBuffer === '```') {
+          isCapturing = false;
+          tickBuffer = '';
+
+          if (['html', 'css', 'js', 'javascript'].includes(currentLang)) {
+            
+            const langKey = currentLang === 'javascript' ? 'js' : currentLang;
+            
+            bufferPerLang = bufferPerLang.slice(0, -3);
+            
+            codeBuffers[langKey] += bufferPerLang;
+
+            const target = document.getElementById("code" + langKey.toUpperCase());
+
+            if (target) {
+              target.textContent = bufferPerLang;
+              Prism.highlightElement(target);
+              saveSyntaxToLocal(langKey, bufferPerLang);
+              target.scrollTop = target.scrollHeight;
+            }
+
+            if (langKey === 'js') {
+              stopParsing = true;
+              break;
+            }
+
+          }
+
+          bufferPerLang = '';
+          currentLang = '';
+          continue;
+        }
+
+
+        // Jika sedang menangkap isi blok
+        if (isCapturing) {
+          if (tickBuffer === '```') {
+            continue;
+          }
+          bufferPerLang += char;
+          
+          if (['html', 'css', 'js', 'javascript'].includes(currentLang)) {
+            const langKey = currentLang === 'javascript' ? 'js' : currentLang;
+            const target = document.getElementById("code" + langKey.toUpperCase());
+
+            if (target) {
+              target.textContent += char;
+              target.scrollTop = target.scrollHeight;
+            }
+          }
+        }
+      }
+
+
+      fullText += chunk;
+
+      // if (extracted.html) {
+      //   // Real-time tampil di HTML (sementara)
+      //   document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
+      //   document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
+      //   document.querySelector(".btn-html").classList.add('active');
+      //   document.querySelector(".code-html").classList.add('active');
+      //   codeHTML.textContent = extracted.html;
+      //   codeHTML.scrollTop = codeHTML.scrollHeight;
+      //   // Prism.highlightElement(codeHTML);
+      // }
+      // if (extracted.css) {
+      //   document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
+      //   document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
+      //   document.querySelector(".btn-css").classList.add('active');
+      //   document.querySelector(".code-css").classList.add('active');
+      //   codeCSS.textContent = extracted.css;
+      //   codeHTML.scrollTop = codeHTML.scrollHeight;
+      //   // Prism.highlightElement(codeCSS);
+      // }
+      // if (extracted.js) {
+      //   document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
+      //   document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
+      //   document.querySelector(".btn-js").classList.add('active');
+      //   document.querySelector(".code-js").classList.add('active');
+      //   codeJS.textContent = extracted.js;
+      //   codeHTML.scrollTop = codeHTML.scrollHeight;
+      //   // Prism.highlightElement(codeJS);
+      // }
+
+      
+
+      // Cek apakah sudah muncul hasil JSON final
+      const start = fullText.indexOf('[[[PARSED_START]]]');
+      const end = fullText.indexOf('[[[PARSED_END]]]');
+
+      if (start !== -1 && end !== -1 && end > start) {
+        const jsonRaw = fullText.substring(start + 18, end);
+        try {
+          parsedJSON = JSON.parse(jsonRaw);
+        } catch (e) {
+          console.error("Gagal parse JSON akhir", e);
+        }
+        break;
+      }
     }
-    document.getElementById("loadingGenerate").style.display = 'none';
-    if (promptbegin) {
-        console.log('Cookie ditemukan! Nilai cookie: ' + promptbegin);
-        valuePrompt.value = "";
-        valuePrompt.textContent = "";
-        deleteCookie('promptbegin');
-    }
+
+    // Gantikan isi dengan hasil akhir
+    // if (parsedJSON) {
+    //   if (parsedJSON.html?.code) {
+    //     document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
+    //     document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
+    //     document.querySelector(".btn-html").classList.add('active');
+    //     document.querySelector(".code-html").classList.add('active');
+    //     codeHTML.textContent = parsedJSON.html.code;
+    //     // await typeTextEffect(parsedJSON.html.code, codeHTML, 1);
+    //     Prism.highlightElement(codeHTML);
+    //     saveSyntaxToLocal('html', parsedJSON.html.code);
+    //   }
+    //   if (parsedJSON.css?.code) {
+    //     document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
+    //     document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
+    //     document.querySelector(".btn-css").classList.add('active');
+    //     document.querySelector(".code-css").classList.add('active');
+    //     codeCSS.textContent = parsedJSON.css.code;
+    //     // await typeTextEffect(parsedJSON.css.code, codeCSS, 1);
+    //     Prism.highlightElement(codeCSS);
+    //     saveSyntaxToLocal('css', parsedJSON.css.code);
+    //   }
+    //   if (parsedJSON.javascript?.code) {
+    //     document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
+    //     document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
+    //     document.querySelector(".btn-js").classList.add('active');
+    //     document.querySelector(".code-js").classList.add('active');
+    //     codeJS.textContent = parsedJSON.javascript.code;
+    //     // await typeTextEffect(parsedJSON.javascript.code, codeJS, 1);
+    //     Prism.highlightElement(codeJS);
+    //     saveSyntaxToLocal('js', parsedJSON.javascript.code);
+    //   }
+    // }
+
+    
   });
+  
+  // submitPrompt.addEventListener('click', async function (e) {
+  //   e.preventDefault();
+
+  //   document.getElementById("loadingGenerate").style.display = 'flex';
+    
+  //   const inputPrompt = valuePrompt.value;
+
+  //   try {
+  //     const response = await fetch('/api/wekker_requests_generate', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/x-www-form-urlencoded',
+  //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+  //       },
+  //       body: `prompt=${encodeURIComponent(inputPrompt)}&api_key=${encodeURIComponent(value.textContent)}&materials=${encodeURIComponent(selectedItems.textContent)}`,
+  //     });
+
+  //     if (!response.ok) {
+  //       console.log('Server response not OK');
+  //     }
+
+  //     const data = await response.json();
+      
+  //     if (data) {
+  //         try {
+  //           if (data.html.code) {
+  //             document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
+  //             document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
+  //             document.querySelector(".btn-html").classList.add('active');
+  //             document.querySelector(".code-html").classList.add('active');
+  //             const codeHTML = document.getElementById('codeHTML');
+  //             await typeTextEffect(data.html.code??null, codeHTML, 1);
+  //             Prism.highlightElement(codeHTML);
+  //             saveSyntaxToLocal('html', data.html.code??null);
+  //           }
+  //         } catch (error) {
+  //             console.error("No Code HTML");
+  //             await typeTextEffect('', document.getElementById('codeHTML'), 1);
+  //         };
+  //         try {
+  //             if (data.css.code) {
+  //                 document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
+  //                 document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
+  //                 document.querySelector(".btn-css").classList.add('active');
+  //                 document.querySelector(".code-css").classList.add('active');
+  //                 const codeCSS = document.getElementById('codeCSS');
+  //                 await typeTextEffect(data.css.code??null, codeCSS, 1);
+  //                 Prism.highlightElement(codeCSS);
+  //                 saveSyntaxToLocal('css', data.css.code??null);
+  //             }
+  //         } catch (error) {
+  //             console.error("No Code CSS");
+  //             await typeTextEffect('', document.getElementById('codeCSS'), 1);
+  //         };
+  //         try {
+  //             if (data.javascript.code) {
+  //                 document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
+  //                 document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
+  //                 document.querySelector(".btn-js").classList.add('active');
+  //                 document.querySelector(".code-js").classList.add('active');
+  //                 const codeJS = document.getElementById('codeJS');
+  //                 await typeTextEffect(data.javascript.code??null, codeJS, 1);
+  //                 Prism.highlightElement(codeJS);
+  //                 saveSyntaxToLocal('js', data.css.javascript??null);
+  //             }
+  //         } catch (error) {
+  //             console.log("No Code JS");
+  //             await typeTextEffect('', document.getElementById('codeJS'), 1);
+  //         };
+  //     } else {
+  //       console.log("Respons JSON tidak valid atau kunci 'html' tidak ditemukan.");
+  //     };
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //     console.log('Sorry, nothing response code from server. Please input prompt correctly !!!');
+  //   }
+  //   document.getElementById("loadingGenerate").style.display = 'none';
+  //   if (promptbegin) {
+  //       console.log('Cookie ditemukan! Nilai cookie: ' + promptbegin);
+  //       valuePrompt.value = "";
+  //       valuePrompt.textContent = "";
+  //       deleteCookie('promptbegin');
+  //   }
+  // });
 
   const getFromDB = await fetch(`/dashboard/main-builder/${uuid}/data`, {
       method: 'GET',
@@ -137,25 +362,44 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
       document.querySelector(".btn-html").classList.add('active');
       document.querySelector(".code-html").classList.add('active');
-      await typeTextEffect(responseDB.html, document.getElementById('codeHTML'), 1);
+      await typeTextOptimized(responseDB.html, document.getElementById('codeHTML'));
       Prism.highlightElement(codeHTML);
       document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
       document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
       document.querySelector(".btn-css").classList.add('active');
       document.querySelector(".code-css").classList.add('active');
-      await typeTextEffect(responseDB.css, document.getElementById('codeCSS'), 1);
+      await typeTextOptimized(responseDB.css, document.getElementById('codeCSS'));
       Prism.highlightElement(codeCSS);
       document.querySelectorAll(".btn-code-nav").forEach(btn => btn.classList.remove("active"));
       document.querySelectorAll(".codenya").forEach(codenya => codenya.classList.remove("active"));
       document.querySelector(".btn-js").classList.add('active');
       document.querySelector(".code-js").classList.add('active');
-      await typeTextEffect(responseDB.javascript, document.getElementById('codeJS'), 5);
+      await typeTextOptimized(responseDB.javascript, document.getElementById('codeJS'));
       Prism.highlightElement(codeJS);
     } catch (error) {
       console.error("Error during typeTextEffect execution:", error);
     }
   };
-      
+  
+
+  function typeTextOptimized(text, targetElement, batchSize = 20, delay = 1) {
+    return new Promise(resolve => {
+      let index = 0;
+      targetElement.textContent = "";
+
+      const interval = setInterval(() => {
+        if (index < text.length) {
+          targetElement.textContent += text.slice(index, index + batchSize);
+          index += batchSize;
+          targetElement.scrollTop = targetElement.scrollHeight;
+        } else {
+          clearInterval(interval);
+          resolve();
+        }
+      }, delay);
+    });
+  }
+
   function typeTextEffect(text, targetElement, delay) {
     return new Promise(resolve => {
         let index = 0;
@@ -165,6 +409,9 @@ document.addEventListener("DOMContentLoaded", async () => {
           if (index < text.length) {
               targetElement.textContent += text[index];
               index++;
+
+              // Auto scroll ke bawah setiap karakter
+              targetElement.scrollTop = targetElement.scrollHeight;
           } else {
               clearInterval(interval);
               resolve();
@@ -239,5 +486,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  setInterval(saveCode, 500);
+  setInterval(saveCode, 10000);
 });

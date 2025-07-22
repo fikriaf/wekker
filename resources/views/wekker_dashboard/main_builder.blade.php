@@ -518,7 +518,7 @@
                                     <label class="dropdown-item">
                                         <input type="checkbox" class="form-check-input dropdown-checkbox" value="MaterialDesignIcons"> Material Design Icons
                                     </label>
-                                </li>                                    
+                                </li>
                             </ul>
                         </div>
                         <div class="script-build col-6 col-md-3 px-0 dropup">
@@ -623,34 +623,40 @@
                 </div>
             </div>
         </div>
-        <div class="center-main row d-flex gap-2 mt-2" style="overflow: hidden;">
-            <div class="col-12 col-md-4 d-flex flex-column bg-secondary rounded-3 p-1">
-                <div class="row m-1">
+        <div class="center-main d-flex gap-2 mt-2" style="width: 100%; height: auto; aspect-ratio: 16 / 7.1;">
+            <div class="col-12 col-md-4 d-flex flex-column rounded-3">
+                <div class="d-flex">
                     <div class="col p-0">
-                        <button type="button" class="btn-html btn-code-nav btn bg-light w-100 rounded-end-0 active">HTML</button>
+                        <button type="button" class="btn-html btn-code-nav btn color-html bg-html w-100 rounded-end-0 active">
+                            <i class="fab fa-html5"></i> HTML
+                        </button>
                     </div>
                     <div class="col p-0">
-                        <button type="button" class="btn-css btn-code-nav btn bg-light w-100 rounded-0">CSS</button>
+                        <button type="button" class="btn-css btn-code-nav btn color-css bg-css w-100 rounded-0">
+                            <i class="fab fa-css3-alt"></i> CSS
+                        </button>
                     </div>
                     <div class="col p-0">
-                        <button type="button" class="btn-js btn-code-nav btn bg-light w-100 rounded-start-0">JS</button>
+                        <button type="button" class="btn-js btn-code-nav btn color-js bg-js w-100 rounded-start-0">
+                            <i class="fab fa-js-square"></i> JS
+                        </button>
                     </div>
                 </div>
-                <div class="codenya h-100 code-html active my-1 flex-grow-1 mx-1" style="overflow: auto; max-height: 400px;">
+                <div class="codenya w-100 h-100 code-html active mt-1" style="overflow: auto; height: 100%;">
                     <pre 
                         class="form-control h-100 language-html m-0 bg-dark text-light" 
                         contenteditable="true"
                         id="codeHTML"
                         style="font-family: 'JetBrains Mono', monospace; font-size: 0.5rem;"></pre>
                 </div>
-                <div class="codenya h-100 code-css my-1 flex-grow-1 mx-1" style="overflow: auto; max-height: 400px;">
+                <div class="codenya h-100 code-css mt-1" style="overflow: auto; height: 100%;">
                     <pre 
                         class="form-control h-100 language-css m-0 bg-dark text-light" 
                         contenteditable="true"
                         id="codeCSS"
                         style="font-family: 'JetBrains Mono', monospace; font-size: 0.5rem;"></pre>
                 </div>
-                <div class="codenya h-100 code-js my-1 flex-grow-1 mx-1" style="overflow: auto; max-height: 400px;">
+                <div class="codenya h-100 code-js mt-1" style="overflow: auto; height: 100%;">
                     <pre 
                         class="form-control h-100 language-js m-0 bg-dark text-light" 
                         contenteditable="true"
@@ -658,7 +664,7 @@
                         style="font-family: 'JetBrains Mono', monospace; font-size: 0.5rem;"></pre>
                 </div>
             </div>
-            <div class="col-12 col-md indukan-preview border border-2 border-secondary rounded-3 overflow-hidden w-100 p-0" style="height: auto;">
+            <div class="col-12 col-md d-flex flex-column indukan-preview border border-2 border-secondary rounded-3 overflow-hidden w-100 p-0" style="height: 100%;">
                 <div class="w-100">
                     <nav class="navbar navbar-expand-sm bg-secondary navbar-dark row px-2 ps-3">
                         <div class="col-1 p-0 m-0 d-flex justify-content-center align-items-center" style="color: white; font-size: 1.5rem;"><ion-icon name="folder-outline"></ion-icon></div>
@@ -673,14 +679,14 @@
                         </div>
                     </nav>
                 </div>
-                <div class="preview p-0 m-0 d-flexbox justify-content-center w-100" style="width: 100%; height: 24rem; overflow: hidden; position: relative;">
+                <div class="preview p-0 m-0 d-flexbox justify-content-center" style="width: 100%; height: auto; aspect-ratio: 16 / 9; overflow: hidden; position: relative;">
                     <iframe 
                         src="" 
                         class="border"
                         id="previewFrame">
                     </iframe>
                 </div>
-                <footer class="footer-preview w-100 bg-secondary text-center text-white" style="height: 30px; font-size: small;">
+                <footer class="footer-preview w-100 bg-secondary mt-auto text-center text-white" style="height: 30px; font-size: small;">
                     On Preview - Desktop
                 </footer>
                 <!-- <div class="no-preview w-100 h-100 d-flex justify-content-center align-items-center">

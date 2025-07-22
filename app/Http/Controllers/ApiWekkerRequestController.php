@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\Request;
@@ -11,12 +10,12 @@ class ApiWekkerRequestController extends Controller
         session_start();
         set_time_limit(0);
         
-        header('Content-Type: text/html; charset=utf-8');
-        header('Cache-Control: no-cache');
-        header('Connection: keep-alive');
-        header("Access-Control-Allow-Origin: *");
-        header("Access-Control-Allow-Headers: Content-Type");
-        header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
+        // header('Content-Type: text/html; charset=utf-8');
+        // header('Cache-Control: no-cache');
+        // header('Connection: keep-alive');
+        // header("Access-Control-Allow-Origin: *");
+        // header("Access-Control-Allow-Headers: Content-Type");
+        // header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
 
         if (!isset($_SESSION['hist1'])) {
             $_SESSION['hist1'] = [];
@@ -34,7 +33,10 @@ class ApiWekkerRequestController extends Controller
 
             $api_key = $request->input('api_key');
             $prompt = $request->input('prompt') ?? null;
-            $material = $request->input('materials') ?? null;
+            $inputMate = $request->input('materials');
+            $material = ($inputMate === 'None' || $inputMate === null) ? null : $inputMate;
+
+            error_log($material);
 
             error_log("Final Response: " . json_encode( $request->user()->api_key));
 
@@ -51,20 +53,30 @@ class ApiWekkerRequestController extends Controller
                 error_log("Missing prompt");
                 exit;
             } else {
-                $prompt = $request->input('prompt');
-                $response = $this->aiku($prompt, $material);
-                $final = $this->extractAndReturnJSON($response);
-                if ($final){
-                    DB::table('users')->where('api_key', $api_key)
-                                            ->increment('total_request');  
-                };
-                return response()->json($final);
+                while (ob_get_level() > 0) {
+                    ob_end_clean();
+                }
+
+                return response()->stream(function ()  use ($prompt, $material, $api_key) {
+                    $respon = (new self)->aiku($prompt, $material);
+                    $parsed = (new self)->extractAndReturnJSON($respon);
+                    echo "\n\n[[[PARSED_START]]]".json_encode($parsed)."[[[PARSED_END]]]";
+                    if (ob_get_level() > 0) {
+                        ob_flush();
+                    };
+                    flush();
+                }, 200, [
+                    'Content-Type' => 'text/plain',
+                    'Cache-Control' => 'no-cache',
+                    'X-Accel-Buffering' => 'no',
+                ]);
             }
         }
     }
 
 
     function aiku($teksnya, $materials) {
+
         $hashnya = "krc0toubb4r";
         $url = "https://qwen-qwen2-5-coder-artifacts.hf.space/gradio_api/queue/join?__theme=system";
         $url_res = "https://qwen-qwen2-5-coder-artifacts.hf.space/gradio_api/queue/data?session_hash=" . $hashnya;
@@ -72,7 +84,7 @@ class ApiWekkerRequestController extends Controller
         $ua = file_exists('ua.txt') ? trim(file('ua.txt')[array_rand(file('ua.txt'))]) : "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36";
         $headers = [
             "Host: qwen-qwen2-5-coder-artifacts.hf.space",
-            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/600.8.9 (KHTML, like Gecko) Version/8.0.8 Safari/600.8.9",
+            "User-Agent: ".$ua,
             "Origin: https://qwen-qwen2-5-coder-artifacts.hf.space",
             "Referer: https://qwen-qwen2-5-coder-artifacts.hf.space/?__theme=system",
             "Content-Type: application/json"
@@ -81,13 +93,12 @@ class ApiWekkerRequestController extends Controller
         $teks = $materials ? $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML. Harus mengandung komponen: ".$materials : $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML";
         $data = [
             "data" => [
-                <<<PROMPT
-                You are a web development engineer, writing web pages according to the instructions below. You are a powerful code editing assistant capable of writing code and creating artifacts in conversations with users, or modifying and updating existing artifacts as requested by users. 
-                All code is written in a single code block to form a complete code file for display, without separating HTML and JavaScript code. An artifact refers to a runnable complete code snippet, you prefer to integrate and output such complete runnable code rather than breaking it down into several code blocks. For certain types of code, they can render graphical interfaces in a UI window. After generation, please check the code execution again to ensure there are no errors in the output.
+                $teks,
+                "
+                You are a web development engineer, writing web pages/component according to the instructions below. You are a powerful code editing assistant capable of writing code and creating artifacts in conversations with users, or modifying and updating existing artifacts as requested by users. An artifact refers to a runnable complete code snippet, you prefer to integrate and output such complete runnable code rather than breaking it down into several code blocks. For certain types of code, they can render graphical interfaces in a UI window. After generation, please check the code execution again to ensure there are no errors in the output.
 
-                Output only the HTML, without any additional descriptive text.
-                PROMPT,
-                $teksnya,
+                Output only the HTML, CSS, JS, without any additional descriptive/explanation.
+                ",
                 null
             ],
             "event_data" => null,
@@ -95,6 +106,7 @@ class ApiWekkerRequestController extends Controller
             "trigger_id" => 12,
             "session_hash" => $hashnya
         ];
+        error_log($teks);
         
         $jsonData = json_encode($data);
 
@@ -120,7 +132,7 @@ class ApiWekkerRequestController extends Controller
 
         try {
             $fp = fopen($url_res, 'r', false, $contextGet);
-            stream_set_timeout($fp, 0);
+            // stream_set_timeout($fp, 0);
             if ($fp) {
                 while (!feof($fp)) {
                     $chunk = fread($fp, 1);
@@ -157,7 +169,11 @@ class ApiWekkerRequestController extends Controller
 
                             foreach ($output_data as $entry) {
                                 if (is_string($entry)) {
-                                    // echo $entry;
+                                    echo $entry;
+                                    if (ob_get_level() > 0) {
+                                        ob_flush();
+                                    }
+                                    flush();
                                     $respon .= $entry;
                                 } elseif (is_array($entry)) {
                                     foreach ($entry as $item) {
@@ -165,9 +181,11 @@ class ApiWekkerRequestController extends Controller
                                             [$action, , $value] = $item;
                                             if ($action === "append" && is_string($value)) {
                                                 // error_log($value);
-                                                // echo $value;
-                                                // flush();
-                                                // ob_flush();
+                                                echo $value;
+                                                if (ob_get_level() > 0) {
+                                                    ob_flush();
+                                                }
+                                                flush();
                                                 $respon .= $value;
                                             }
                                         }
