@@ -65,135 +65,119 @@ class ApiWekkerRequestController extends Controller
 
 
     function aiku($teksnya, $materials) {
-        $hashnya = "l9hdjdc60e";
-        $url = "https://qwen-qwen1-5-110b-chat-demo.hf.space/queue/join?__theme=light";
-        $url_res = "https://qwen-qwen1-5-110b-chat-demo.hf.space/queue/data?session_hash=". $hashnya;
-        $ua = file_exists('ua.txt') ? trim(file('ua.txt')[array_rand(file('ua.txt'))]) : "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36";
+        $hashnya = "krc0toubb4r";
+        $url = "https://qwen-qwen2-5-coder-artifacts.hf.space/gradio_api/queue/join?__theme=system";
+        $url_res = "https://qwen-qwen2-5-coder-artifacts.hf.space/gradio_api/queue/data?session_hash=" . $hashnya;
 
+        $ua = file_exists('ua.txt') ? trim(file('ua.txt')[array_rand(file('ua.txt'))]) : "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36";
+        $headers = [
+            "Host: qwen-qwen2-5-coder-artifacts.hf.space",
+            "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/600.8.9 (KHTML, like Gecko) Version/8.0.8 Safari/600.8.9",
+            "Origin: https://qwen-qwen2-5-coder-artifacts.hf.space",
+            "Referer: https://qwen-qwen2-5-coder-artifacts.hf.space/?__theme=system",
+            "Content-Type: application/json"
+        ];
         // $teks = $teksnya;
         $teks = $materials ? $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML. Harus mengandung komponen: ".$materials : $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML";
         $data = [
             "data" => [
-                $teks,
-                $_SESSION['hist1'],
-                "NO EXPLANATION, DIRECT CODING. You are a webpage creation machine. You can only create web code using HTML, CSS and JS separately."
+                <<<PROMPT
+                You are a web development engineer, writing web pages according to the instructions below. You are a powerful code editing assistant capable of writing code and creating artifacts in conversations with users, or modifying and updating existing artifacts as requested by users. 
+                All code is written in a single code block to form a complete code file for display, without separating HTML and JavaScript code. An artifact refers to a runnable complete code snippet, you prefer to integrate and output such complete runnable code rather than breaking it down into several code blocks. For certain types of code, they can render graphical interfaces in a UI window. After generation, please check the code execution again to ensure there are no errors in the output.
+
+                Output only the HTML, without any additional descriptive text.
+                PROMPT,
+                $teksnya,
+                null
             ],
             "event_data" => null,
-            "fn_index" => 0,
+            "fn_index" => 8,
             "trigger_id" => 12,
             "session_hash" => $hashnya
         ];
         
         $jsonData = json_encode($data);
 
-        $options = [
-            'http' => [
-                'header'  => "Content-Type: application/json\r\n".
-                                "User-Agent: ".$ua,
-                'method'  => 'POST',
-                'content' => $jsonData
-            ]
-        ];
-        $context = stream_context_create($options);
-        file_get_contents($url, false, $context);
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_POSTFIELDS => $jsonData,
+        ]);
+        curl_exec($ch);
+        curl_close($ch);
 
-        $optionsGet = [
+        $contextGet = stream_context_create([
             'http' => [
-                'header' => "User-Agent: ".$ua
+                'method' => 'GET',
+                'header' => implode("\r\n", $headers),
             ]
-        ];
-        $contextGet = stream_context_create($optionsGet);
+        ]);
         
-        $bufferData = "";
+        $buffer = "";
         $respon = "";
-        $berhenti = true;
+
         try {
-            $handle = fopen($url_res, "rb", false, $contextGet);
-            if ($handle) {
-                while (!feof($handle)) {
-                    $buffer = fread($handle, 1);
-                    $bufferData .= $buffer;
+            $fp = fopen($url_res, 'r', false, $contextGet);
+            stream_set_timeout($fp, 0);
+            if ($fp) {
+                while (!feof($fp)) {
+                    $chunk = fread($fp, 1);
+                    if ($chunk === false) break;
 
-                    if (strpos($bufferData, "process_completed")) {
-                        $berhenti = false;
-                    }
+                    $buffer .= $chunk;
 
-                    if (str_contains($bufferData, "\n\ndata: ")) {
-                        $messages = explode("\n\ndata: ", $bufferData);
-                        foreach ($messages as $mess) {
-                            if (strpos($mess, "process_generating") !== false) {
-                                try {
-                                    $mesh = preg_replace('/^data: /', '', $mess);
-                                    $jsonnya = json_decode($mesh, true);
-                        
-                                    if (isset($jsonnya['output']) && isset($jsonnya['output']['data'])) {
-                                        $data_list = $jsonnya['output']['data'][1];
-                        
-                                        foreach ($data_list as $item) {
-                                            if (is_array($item) && count($item) > 1) {
-                                                $text_value = $item[1];
-                        
-                                                if (is_string($text_value)) {
-                                                    $exists = false;
-                                                    foreach ($_SESSION['hist1'] as $i) {
-                                                        if (isset($i[1]) && $i[1] == $text_value) {
-                                                            $exists = true;
-                                                            break;
-                                                        }
-                                                    }
-                        
-                                                    if (!$exists) {
-                                                        // echo $text_value;
-                                                        // flush();
-                                                        // ob_flush();
-                                                        $respon .= $text_value;
-                                                        break;
-                                                    }
-                                                }
+                    while (strpos($buffer, "\n\n") !== false) {
+                        [$event, $buffer] = explode("\n\n", $buffer, 2);
+
+                        $lines = [];
+                        foreach (explode("\n", $event) as $line) {
+                            if (strpos($line, "data: ") === 0) {
+                                $lines[] = substr($line, 6);
+                            }
+                        }
+
+                        if (empty($lines)) continue;
+
+                        $json_string = implode('', $lines);
+                        $data_json = json_decode($json_string, true);
+
+                        if (!$data_json) {
+                            continue;
+                        }
+
+                        $msg = $data_json["msg"] ?? null;
+                        if ($msg === "process_completed") {
+                            break 2;
+                        }
+
+                        if ($msg === "process_generating") {
+                            $output_data = $data_json["output"]["data"] ?? [];
+
+                            foreach ($output_data as $entry) {
+                                if (is_string($entry)) {
+                                    // echo $entry;
+                                    $respon .= $entry;
+                                } elseif (is_array($entry)) {
+                                    foreach ($entry as $item) {
+                                        if (is_array($item) && count($item) >= 3) {
+                                            [$action, , $value] = $item;
+                                            if ($action === "append" && is_string($value)) {
+                                                // error_log($value);
+                                                // echo $value;
+                                                // flush();
+                                                // ob_flush();
+                                                $respon .= $value;
                                             }
                                         }
                                     }
-                                } catch (\Exception $e) {
-                                    break;
                                 }
                             }
                         }
-                        
-                        foreach ($messages as $message) {                    
-                            if (strpos($message, "process_generating") !== false) {
-                                try {
-                                    $meshh = preg_replace('/^data: /', '', $message);
-                                    $jsonnyaa = json_decode($meshh, true);
-                        
-                                    if (isset($jsonnyaa['output']) && isset($jsonnyaa['output']['data'])) {
-                                        $data_listt = $jsonnyaa['output']['data'][1];
-                        
-                                        foreach ($data_listt as $item) {
-                                            if (is_array($item) && count($item) > 2) {
-                                                $text_value = $item[2];
-                        
-                                                if (is_string($text_value) && !in_array($text_value, array_column($_SESSION['hist1'], 1))) {
-                                                    // echo $text_value;
-                                                    // flush();
-                                                    // ob_flush();
-                                                    $respon .= $text_value;
-                                                }
-                                            }
-                                        }
-                                    }
-                                } catch (\Exception $e) {
-                                    break;
-                                }
-                            }
-                        }
-                        $bufferData = "";
-                        
-                    }
-                    if (!$berhenti) {
-                        break;
                     }
                 }
-                fclose($handle);
+                fclose($fp);
             } else {
                 echo "Error opening URL.";
             }

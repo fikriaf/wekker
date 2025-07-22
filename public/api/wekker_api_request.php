@@ -88,153 +88,99 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 function ai($teksnya, $materials) {
-    $hashnya = "czva0ffte";
-    $url = "https://qwen-qwen3-demo.hf.space/queue/join?__theme=light";
-    $url_res = "https://qwen-qwen3-demo.hf.space/queue/data?session_hash=". $hashnya;
+    $hashnya = "krc0toubb4r";
+    $url = "https://qwen-qwen2-5-coder-artifacts.hf.space/gradio_api/queue/join?__theme=system";
+    $url_res = "https://qwen-qwen2-5-coder-artifacts.hf.space/gradio_api/queue/data?session_hash=" . $hashnya;
+
     $ua = file_exists('ua.txt') ? trim(file('ua.txt')[array_rand(file('ua.txt'))]) : "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36";
 
     $teks = $materials ? $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML. Harus mengandung komponen: ".$materials : $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML";
+    
     $data = [
-        "data" => [
-            $teks,
-            [
-                "model" => "qwen3-235b-a22b",
-                "sys_prompt" => "NO EXPLANATION, DIRECT CODING. You are a webpage creation machine. You can only create web code using HTML, CSS and JS separately.",
-                "thinking_budget" => 38,
-            ],
-            [],
-            []
-        ],
-        "event_data" => "null",
-        "fn_index" => 13,
-        "trigger_id" => 31,
-        "session_hash" => $hashnya,
+        "data" => [$teksnya, null, null],
+        "event_data" => null,
+        "fn_index" => 8,
+        "trigger_id" => 12,
+        "session_hash" => $hashnya
     ];
-    // $data = [
-    //     "data" => [
-    //         $teks,
-    //         $_SESSION['hist1'],
-    //         "NO EXPLANATION, DIRECT CODING. You are a webpage creation machine. You can only create web code using HTML, CSS and JS separately."
-    //     ],
-    //     "event_data" => null,
-    //     "fn_index" => 0,
-    //     "trigger_id" => 12,
-    //     "session_hash" => $hashnya
-    // ];
-    
-    $jsonData = json_encode($data);
 
-    $options = [
-        'http' => [
-            'header'  => "Content-Type: application/json\r\n".
-                            "User-Agent: ".$ua,
-            'method'  => 'POST',
-            'content' => $jsonData
-        ]
+    $headers = [
+        "Host: qwen-qwen2-5-coder-artifacts.hf.space",
+        "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/600.8.9 (KHTML, like Gecko) Version/8.0.8 Safari/600.8.9",
+        "Origin: https://qwen-qwen2-5-coder-artifacts.hf.space",
+        "Referer: https://qwen-qwen2-5-coder-artifacts.hf.space/?__theme=system",
+        "Content-Type: application/json"
     ];
-    $context = stream_context_create($options);
-    file_get_contents($url, false, $context);
-
-    $optionsGet = [
-        'http' => [
-            'header' => "User-Agent: ".$ua
-        ]
-    ];
-    $contextGet = stream_context_create($optionsGet);
     
-    $bufferData = "";
+    $ch_post = curl_init($url);
+    curl_setopt($ch_post, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch_post, CURLOPT_POST, true);
+    curl_setopt($ch_post, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch_post, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_exec($ch_post);
+    curl_close($ch_post);
+
     $respon = "";
-    $berhenti = true;
+
     try {
-        $handle = fopen($url_res, "rb", false, $contextGet);
-        if ($handle) {
-            while (!feof($handle)) {
-                $buffer = fread($handle, 1);
-                $bufferData .= $buffer;
+        $ch_get = curl_init($url_res);
+        curl_setopt($ch_get, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch_get, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch_get, CURLOPT_WRITEFUNCTION, function ($ch, $chunk) use (&$respon) {
+            static $buffer = "";
 
-                if (strpos($bufferData, "process_completed")) {
-                    $berhenti = false;
+            $buffer .= $chunk;
+
+            while (strpos($buffer, "\n\n") !== false) {
+                list($event, $buffer) = explode("\n\n", $buffer, 2);
+                $lines = [];
+
+                foreach (explode("\n", $event) as $line) {
+                    if (strpos($line, "data: ") === 0) {
+                        $lines[] = substr($line, 6);
+                    }
                 }
 
-                if (str_contains($bufferData, "\n\ndata: ")) {
-                    $messages = explode("\n\ndata: ", $bufferData);
-                    foreach ($messages as $mess) {
-                        if (strpos($mess, "process_generating") !== false) {
-                            try {
-                                $mesh = preg_replace('/^data: /', '', $mess);
-                                $jsonnya = json_decode($mesh, true);
-                    
-                                if (isset($jsonnya['output']) && isset($jsonnya['output']['data'])) {
-                                    $data_list = $jsonnya['output']['data'][1];
-                    
-                                    foreach ($data_list as $item) {
-                                        if (is_array($item) && count($item) > 1) {
-                                            $text_value = $item[1];
-                    
-                                            if (is_string($text_value)) {
-                                                $exists = false;
-                                                foreach ($_SESSION['hist1'] as $i) {
-                                                    if (isset($i[1]) && $i[1] == $text_value) {
-                                                        $exists = true;
-                                                        break;
-                                                    }
-                                                }
-                    
-                                                if (!$exists) {
-                                                    // echo $text_value;
-                                                    // flush();
-                                                    // ob_flush();
-                                                    $respon .= $text_value;
-                                                    break;
-                                                }
-                                            }
-                                        }
+                if (empty($lines)) continue;
+
+                $full_data = implode("", $lines);
+
+                $data_json = json_decode($full_data, true);
+                if (!$data_json) continue;
+
+                $msg = $data_json["msg"] ?? null;
+
+                if ($msg === "process_completed") {
+                    return 0; // Stop curl streaming
+                }
+
+                if ($msg === "process_generating") {
+                    $output_data = $data_json["output"]["data"] ?? [];
+
+                    foreach ($output_data as $entry) {
+                        if (is_string($entry)) {
+                            echo $entry;
+                            $respon .= $entry;
+                        } elseif (is_array($entry)) {
+                            foreach ($entry as $item) {
+                                if (is_array($item) && count($item) >= 3) {
+                                    list($action, $_, $value) = $item;
+                                    if ($action === "append" && is_string($value)) {
+                                        echo $value;
+                                        flush();
+                                        ob_flush();
+                                        $respon .= $value;
                                     }
                                 }
-                            } catch (Exception $e) {
-                                break;
                             }
                         }
                     }
-                    
-                    foreach ($messages as $message) {
-                        if (strpos($message, "process_generating") !== false) {
-                            try {
-                                $meshh = preg_replace('/^data: /', '', $message);
-                                $jsonnyaa = json_decode($meshh, true);
-                    
-                                if (isset($jsonnyaa['output']) && isset($jsonnyaa['output']['data'])) {
-                                    $data_listt = $jsonnyaa['output']['data'][1];
-                    
-                                    foreach ($data_listt as $item) {
-                                        if (is_array($item) && count($item) > 2) {
-                                            $text_value = $item[2];
-                    
-                                            if (is_string($text_value) && !in_array($text_value, array_column($_SESSION['hist1'], 1))) {
-                                                // echo $text_value;
-                                                // flush();
-                                                // ob_flush();
-                                                $respon .= $text_value;
-                                            }
-                                        }
-                                    }
-                                }
-                            } catch (Exception $e) {
-                                break;
-                            }
-                        }
-                    }
-                    $bufferData = "";
-                    
-                }
-                if (!$berhenti) {
-                    break;
                 }
             }
-            fclose($handle);
-        } else {
-            echo "Error opening URL.";
-        }
+            return strlen($chunk);
+        });
+        curl_exec($ch_get);
+        curl_close($ch_get);
     } catch (DivisionByZeroError $e) {
         echo "Error: " . $e->getMessage() . "\n";
     } catch (Exception $e) {
