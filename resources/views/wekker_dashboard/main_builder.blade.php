@@ -623,8 +623,8 @@
                 </div>
             </div>
         </div>
-        <div class="center-main d-flex gap-2 mt-2" style="width: 100%; height: auto; aspect-ratio: 16 / 7.1;">
-            <div class="col-12 col-md-4 d-flex flex-column rounded-3">
+        <div class="center-main d-flex gap-2 mt-2" style="width: 100%; height: auto;">
+            <div class="col-12 col-md-4 d-flex flex-column rounded-3 overflow-auto" style="height: auto; aspect-ratio: 16 / 9;">
                 <div class="d-flex">
                     <div class="col p-0">
                         <button type="button" class="btn-html btn-code-nav btn color-html bg-html w-100 rounded-end-0 active">

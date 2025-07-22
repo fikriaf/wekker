@@ -89,15 +89,16 @@ class ApiWekkerRequestController extends Controller
             "Referer: https://qwen-qwen2-5-coder-artifacts.hf.space/?__theme=system",
             "Content-Type: application/json"
         ];
-        // $teks = $teksnya;
-        $teks = $materials ? $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML. Harus mengandung komponen: ".$materials : $teksnya.". HTML CSS JS TERPISAH (jika ada), Sertakan body di HTML";
+
+        $teks = $materials
+            ? $teksnya.". Kode HTML, CSS, dan JS harus DIPISAHKAN ke dalam tiga blok berbeda. HTML harus berisi tag <body>. Komponen harus mencakup: ".$materials
+            : $teksnya.". Kode HTML, CSS, dan JS harus DIPISAHKAN ke dalam tiga blok berbeda. HTML harus berisi tag <body>.";
+            
         $data = [
             "data" => [
                 $teks,
                 "
-                You are a web development engineer, writing web pages/component according to the instructions below. You are a powerful code editing assistant capable of writing code and creating artifacts in conversations with users, or modifying and updating existing artifacts as requested by users. An artifact refers to a runnable complete code snippet, you prefer to integrate and output such complete runnable code rather than breaking it down into several code blocks. For certain types of code, they can render graphical interfaces in a UI window. After generation, please check the code execution again to ensure there are no errors in the output.
-
-                Output only the HTML, CSS, JS, without any additional descriptive/explanation.
+                You are a web development assistant that outputs HTML, CSS, and JS **SEPARATELY in three distinct code blocks**. Do not merge them into one HTML file. Do not explain. Just output 3 parts: HTML code, CSS code, JS code in that order. Make sure each part is complete and standalone. HTML must contain <body> structure. SYSPROMPT>>.
                 ",
                 null
             ],
@@ -106,7 +107,6 @@ class ApiWekkerRequestController extends Controller
             "trigger_id" => 12,
             "session_hash" => $hashnya
         ];
-        error_log($teks);
         
         $jsonData = json_encode($data);
 

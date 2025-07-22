@@ -406,7 +406,13 @@ document.addEventListener('DOMContentLoaded', async function() {
           cachedText = currentText;
 
           const cursorPosition = saveCursorPosition(editableCode);
-          Prism.highlightElement(editableCode);
+          editableCode.innerText = currentText;
+
+          const lang = editableCode.className.split('language-')[1] || 'javascript';
+          const highlighted = Prism.highlight(currentText, Prism.languages[lang], lang);
+
+          editableCode.innerHTML = highlighted;
+
           restoreCursorPosition(editableCode, cursorPosition);
       });
   }
