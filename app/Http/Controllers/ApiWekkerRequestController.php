@@ -101,7 +101,7 @@ class ApiWekkerRequestController extends Controller
 
         $teks = $materials
             ? $teksnya . ". The component must include: " . $materials
-            : $teksnya . ". The component must include: Tailwind";
+            : $teksnya . ". The component must include: Tailwind OR Bootstrap, and add CSS if needed";
 
         error_log($hashnya);
         error_log($ua);

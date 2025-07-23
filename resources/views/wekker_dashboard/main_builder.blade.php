@@ -683,7 +683,8 @@
                     <iframe 
                         src="" 
                         class="border"
-                        id="previewFrame">
+                        id="previewFrame"
+                        sandbox="allow-scripts allow-same-origin">
                     </iframe>
                 </div>
                 <footer class="footer-preview w-100 bg-secondary mt-auto text-center text-white" style="height: 30px; font-size: small;">
