@@ -1,7 +1,10 @@
 # wekker.my.id
 
+- 🔗 **Live App**: [https://wekker.my.id/](https://wekker.my.id/)
+
 ## What is Wekker?
 Wekker is a Laravel-based platform designed to make it easier for users to create, edit and manage web pages automatically. With Wekker, users can create various types of web pages quickly without requiring in-depth technical skills. Features such as Main Builder, Developer Tools, and API Management allow users to customize web pages according to their needs, from design to backend functionality.
+
 
 ## Preview
 - Home
@@ -11,6 +14,31 @@ Wekker is a Laravel-based platform designed to make it easier for users to creat
 - Dashboard
   
   ![image](https://github.com/user-attachments/assets/5a729bd5-603c-49b4-b9e8-1f2d95930075)
+
+## 🔑 Key Features
+
+- 🧠 Generate UI components from natural language prompts
+- ⚡ Real-time code streaming (see code as it’s generated)
+- 👀 Live preview without refreshing or rebuilding
+- 🧩 Clean, separated output: HTML, CSS, and JS
+- 📱 Responsive layout powered by **Bootstrap**
+- 🖥️ Backend built with **Laravel**
+- 🪶 Lightweight, fast, and developer-friendly interface
+- 🔓 Easy login (no email verification)
+- ♾️ Unlimited code generation requests
+
+---
+
+## 🧰 Tech Stack
+
+| Layer       | Technology                  |
+|-------------|------------------------------|
+| Framework   | Laravel (PHP)               |
+| Frontend    | JavaScript, CSS, Bootstrap  |
+| Database    | MySQL                       |
+| Streaming   | Custom Laravel controller   |
+
+---
 
 ## Our Team
 - [@fikriaf](https://github.com/fikriaf)
