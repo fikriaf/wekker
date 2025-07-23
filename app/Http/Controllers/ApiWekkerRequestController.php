@@ -35,10 +35,10 @@ class ApiWekkerRequestController extends Controller
             $prompt = $request->input('prompt') ?? null;
             $inputMate = $request->input('materials');
             $material = ($inputMate === 'None' || $inputMate === null) ? null : $inputMate;
+            $ua = $request->input('ua');
+            $hash = $request->input('hash');
 
-            error_log($material);
-
-            error_log("Final Response: " . json_encode( $request->user()->api_key));
+            error_log("Api Key: " . json_encode( $request->user()->api_key));
 
             $isValid = DB::table('users')
                     ->where('api_key', $api_key)
@@ -57,14 +57,19 @@ class ApiWekkerRequestController extends Controller
                     ob_end_clean();
                 }
 
-                return response()->stream(function ()  use ($prompt, $material, $api_key) {
-                    $respon = (new self)->aiku($prompt, $material);
+                return response()->stream(function ()  use ($prompt, $material, $api_key, $ua, $hash) {
+                    $respon = (new self)->aiku($prompt, $material, $ua, $hash);
                     $parsed = (new self)->extractAndReturnJSON($respon);
                     echo "\n\n[[[PARSED_START]]]".json_encode($parsed)."[[[PARSED_END]]]";
                     if (ob_get_level() > 0) {
                         ob_flush();
                     };
                     flush();
+
+                    DB::table('users')
+                    ->where('api_key', $api_key)
+                    ->increment('total_request');
+
                 }, 200, [
                     'Content-Type' => 'text/plain',
                     'Cache-Control' => 'no-cache',
@@ -74,14 +79,12 @@ class ApiWekkerRequestController extends Controller
         }
     }
 
+    function aiku($teksnya, $materials, $ua, $hash) {
 
-    function aiku($teksnya, $materials) {
-
-        $hashnya = "krc0toubb4r";
+        $hashnya = $hash;
         $url = "https://qwen-qwen2-5-coder-artifacts.hf.space/gradio_api/queue/join?__theme=system";
         $url_res = "https://qwen-qwen2-5-coder-artifacts.hf.space/gradio_api/queue/data?session_hash=" . $hashnya;
 
-        $ua = file_exists('ua.txt') ? trim(file('ua.txt')[array_rand(file('ua.txt'))]) : "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36";
         $headers = [
             "Host: qwen-qwen2-5-coder-artifacts.hf.space",
             "User-Agent: ".$ua,
@@ -89,17 +92,42 @@ class ApiWekkerRequestController extends Controller
             "Referer: https://qwen-qwen2-5-coder-artifacts.hf.space/?__theme=system",
             "Content-Type: application/json"
         ];
+        $contextGet = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => implode("\r\n", $headers),
+            ]
+        ]);
 
         $teks = $materials
-            ? $teksnya.". Kode HTML, CSS, dan JS harus DIPISAHKAN ke dalam tiga blok berbeda. HTML harus berisi tag <body>. Komponen harus mencakup: ".$materials
-            : $teksnya.". Kode HTML, CSS, dan JS harus DIPISAHKAN ke dalam tiga blok berbeda. HTML harus berisi tag <body>.";
-            
+            ? $teksnya . ". The component must include: " . $materials
+            : $teksnya . ". The component must include: Tailwind";
+
+        error_log($hashnya);
+        error_log($ua);
+        error_log($teks);
+
+        // $upPrompt = [
+        //     "data" => [
+        //         "You are a professional web developer focused on building modern, high-quality user interfaces. Every interface you create must be visually polished, responsive, and production-ready.
+
+        //         Your outputs must include:
+        //         - Full structural layout,
+        //         - Complete styling for the layout,
+        //         - Interactive behavior for user experience.
+
+        //         Do not include explanations or comments. Use only plain code. Avoid generic designs—make every detail look intentional and clean. Maintain consistent spacing, layout balance, and smooth interactivity across all screen sizes.",
+        //     ],
+        //     "event_data" => null,
+        //     "fn_index" => 2,
+        //     "trigger_id" => 25,
+        //     "session_hash" => $hashnya
+        // ];
+        
         $data = [
             "data" => [
                 $teks,
-                "
-                You are a web development assistant that outputs HTML, CSS, and JS **SEPARATELY in three distinct code blocks**. Do not merge them into one HTML file. Do not explain. Just output 3 parts: HTML code, CSS code, JS code in that order. Make sure each part is complete and standalone. HTML must contain <body> structure. SYSPROMPT>>.
-                ",
+                null,
                 null
             ],
             "event_data" => null,
@@ -107,8 +135,21 @@ class ApiWekkerRequestController extends Controller
             "trigger_id" => 12,
             "session_hash" => $hashnya
         ];
-        
+
+        // $jsonDataPrompt = json_encode($upPrompt);
         $jsonData = json_encode($data);
+
+        // $chPrompt = curl_init($url);
+        // curl_setopt_array($chPrompt, [
+        //     CURLOPT_POST => true,
+        //     CURLOPT_RETURNTRANSFER => true,
+        //     CURLOPT_HTTPHEADER => $headers,
+        //     CURLOPT_POSTFIELDS => $jsonDataPrompt,
+        // ]);
+        // curl_exec($chPrompt);
+        // curl_close($chPrompt);
+
+        // file_get_contents($url_res, false, $contextGet);
 
         $ch = curl_init($url);
         curl_setopt_array($ch, [
@@ -120,13 +161,7 @@ class ApiWekkerRequestController extends Controller
         curl_exec($ch);
         curl_close($ch);
 
-        $contextGet = stream_context_create([
-            'http' => [
-                'method' => 'GET',
-                'header' => implode("\r\n", $headers),
-            ]
-        ]);
-        
+
         $buffer = "";
         $respon = "";
 
@@ -223,7 +258,7 @@ class ApiWekkerRequestController extends Controller
             $result['error'] = "Sorry, nothing response code from server.";
         }
         // Debug: Log extracted result
-        error_log("Extracted Result: " . json_encode($result, JSON_PRETTY_PRINT));
+        // error_log("Extracted Result: " . json_encode($result, JSON_PRETTY_PRINT));
         return $result;
         // return json_encode($result, JSON_PRETTY_PRINT);
     }

@@ -10,6 +10,47 @@ document.addEventListener("DOMContentLoaded", async () => {
   const value = document.getElementById("valueApiKey");
   const valuePrompt = document.getElementById('inputPrompt');
   const selectedItems = document.getElementById('selectedItems');
+
+  const session_hash = Math.random().toString(36).substring(2, 13);
+  const urlJoin = "https://qwen-qwen2-5-coder-artifacts.hf.space/gradio_api/queue/join?__theme=system";
+  const urlData = "https://qwen-qwen2-5-coder-artifacts.hf.space/gradio_api/queue/data?session_hash=" + session_hash;
+
+  const uaText = await fetch('/ua.txt').then(res => res.text());
+  const uaList = uaText
+    .split('\n')
+    .map(s => s.trim())
+    .filter(s => s);
+
+  const randomUA = uaList[Math.floor(Math.random() * uaList.length)];
+
+  const headers = {
+    "Content-Type": "application/json",
+    "User-Agent": randomUA,
+    "Origin": "https://qwen-qwen2-5-coder-artifacts.hf.space",
+    "Referer": "https://qwen-qwen2-5-coder-artifacts.hf.space/?__theme=system"
+  };
+
+  const upPrompt = {
+    data: [
+`You are a professional web developer who creates modern, professional, and production-ready UI components.
+
+REQUIREMENTS:
+- Output is only HTML (start with normal full), CSS, and JS. And must be SEPARATED.
+- DO NOT include explanations, comments, or extra text.
+- All designs must be balanced, intentional, and visually polished.
+- You can add external styling/script library to make it look good.
+- You MUST style every element. No default, raw, or unstyled HTML is allowed. Everything must look designed, clean, and consistent.
+- HTML must be semantic and accessible. Always include imports if external styles or scripts are used.
+- CSS must handle complex and complete visual styling.
+- JavaScript must be clean, modular, and also handle interaction behavior.
+
+Maintain perfect consistency in spacing, typography, and interactivity.`
+    ],
+    event_data: null,
+    fn_index: 2,
+    trigger_id: 25,
+    session_hash: session_hash
+  };
   
   function getCookie(name) {
     let nameEQ = name + "=";
@@ -47,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         'Content-Type': 'application/x-www-form-urlencoded',
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
       },
-      body: `prompt=${encodeURIComponent(inputPrompt)}&api_key=${encodeURIComponent(value.textContent)}&materials=${encodeURIComponent(selectedItems.textContent)}`,
+      body: `prompt=${encodeURIComponent(inputPrompt)}&api_key=${encodeURIComponent(value.textContent)}&materials=${encodeURIComponent(selectedItems.textContent)}&ua=${encodeURIComponent(randomUA)}&hash=${encodeURIComponent(session_hash)}`,
     });
 
     // if (!response.ok || !response.body) {
@@ -485,6 +526,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
   }
+
+  // Kirim prompt
+  await fetch(urlJoin, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(upPrompt)
+  });
+
+  // Tunggu sedikit sebelum GET (opsional delay 300ms)
+  await new Promise(res => setTimeout(res, 300));
+
+  // Ambil hasil queue
+  await fetch(urlData, {
+    method: 'GET',
+    headers
+  });
 
   setInterval(saveCode, 10000);
 });
