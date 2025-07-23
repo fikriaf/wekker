@@ -1,6 +1,16 @@
-# wekker.my.id
+# 🛠️ Wekker — Auto Web Page Generator (Now with Live Preview!)
 
 - 🔗 **Live App**: [https://wekker.my.id/](https://wekker.my.id/)
+
+🆕 **Latest Update:** Real-time code streaming & live preview for faster and more intuitive UI development!
+
+---
+
+**Wekker** is a smart web tool that generates production-ready UI components directly from plain text prompts. It now supports **real-time code streaming** and **live previews** so you can instantly see the HTML, CSS, and JavaScript being built as you type.
+
+> 🚀 Perfect for developers, designers, and rapid prototypers.
+
+---
 
 ## What is Wekker?
 Wekker is a Laravel-based platform designed to make it easier for users to create, edit and manage web pages automatically. With Wekker, users can create various types of web pages quickly without requiring in-depth technical skills. Features such as Main Builder, Developer Tools, and API Management allow users to customize web pages according to their needs, from design to backend functionality.
