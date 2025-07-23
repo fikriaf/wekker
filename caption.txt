@@ -1,0 +1,49 @@
+=================================================
+
+🆕 I’ve just updated Wekker with new features to improve the development experience. 🟢 
+
+=================================================
+
+It’s an auto web page generator that builds UI components directly from text descriptions, now with real-time code streaming and live preview during generation, so you can instantly see the results as they come in.
+
+HTML, CSS, and JavaScript are generated separately, cleanly, and ready to use.
+
+=================================================
+
+Wekker Key Features:
+
+1️⃣ Build UI components directly from text prompts
+
+2️⃣ Real-time code streaming (no waiting for full output)
+
+3️⃣ Live preview while code is being generated
+
+4️⃣ Clean separation of HTML, CSS, and JavaScript
+
+5️⃣ Responsive layout using Bootstrap
+
+6️⃣ Backend powered by Laravel
+
+7️⃣ Lightweight and developer-friendly interface
+
+-------------------------------------------------------------------------------------
+
+Technologies used:
+
+✔️ Full Stack Framework: Laravel
+
+✔️ Database: MySQL
+
+✔️ Additional Frontend: JavaScript, CSS, Bootstrap.
+
+-------------------------------------------------------------------------------------
+
+💻 Source Code: https://github.com/fikriaf/wekker
+
+=================================================
+
+I’m also working on next version that supports modern frameworks components like React. stay tuned for the next project.
+
+=================================================
+
+#wekker #webdevelopment #laravel #javascript #css #bootstrap #frontend #uiux #automation #realtimedev #techdemo #react #comingsoon

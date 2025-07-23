@@ -167,7 +167,6 @@ class ApiWekkerRequestController extends Controller
 
         try {
             $fp = fopen($url_res, 'r', false, $contextGet);
-            // stream_set_timeout($fp, 0);
             if ($fp) {
                 while (!feof($fp)) {
                     $chunk = fread($fp, 1);
