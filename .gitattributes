@@ -9,3 +9,19 @@
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore
+
+# Exclude Blade views from language stats
+resources/views/* linguist-detectable=false
+*.blade.php linguist-detectable=false
+
+# Exclude config and docs from stats
+*.md linguist-detectable=false
+*.json linguist-detectable=false
+*.lock linguist-detectable=false
+*.yml linguist-detectable=false
+*.yaml linguist-detectable=false
+
+# Reinforce core languages
+*.php linguist-language=PHP
+*.js linguist-language=JavaScript
+*.css linguist-language=CSS
