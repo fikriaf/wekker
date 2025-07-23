@@ -12,7 +12,7 @@ CHANGELOG.md export-ignore
 
 # Exclude Blade views from language stats
 resources/views/* linguist-detectable=true
-*.blade.php linguist-detectable=true
+*.blade.php linguist-detectable=Blade
 
 # Exclude config and docs from stats
 *.md linguist-detectable=false
