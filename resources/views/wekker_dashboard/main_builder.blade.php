@@ -352,7 +352,12 @@
                             <ul class="dropdown-menu p-1" aria-labelledby="dropdownFramework" style="max-height: 200px; overflow-y: scroll;">
                                 <li>
                                     <label class="dropdown-item">
-                                        <input type="checkbox" class="form-check-input dropdown-checkbox" value="Bootstrap"> Bootstrap
+                                        <input type="radio" name="framework" class="form-check-input dropdown-checkbox" value="Bootstrap"> Bootstrap
+                                    </label>
+                                </li>
+                                <li>
+                                    <label class="dropdown-item">
+                                        <input type="radio" name="framework" class="form-check-input dropdown-checkbox" value="Tailwind"> Tailwind
                                     </label>
                                 </li>
                             </ul>
@@ -624,7 +629,7 @@
             </div>
         </div>
         <div class="center-main d-flex gap-2 mt-2" style="width: 100%; height: auto;">
-            <div class="col-12 col-md-4 d-flex flex-column rounded-3 overflow-auto" style="height: auto; aspect-ratio: 16 / 9;">
+            <div class="col-12 col-md-4 d-flex flex-column rounded-3 overflow-auto reverseannya" style="height: auto; aspect-ratio: 16 / 9;">
                 <div class="d-flex">
                     <div class="col p-0">
                         <button type="button" class="btn-html btn-code-nav btn color-html bg-html w-100 rounded-end-0 active">
